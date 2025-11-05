@@ -1,8 +1,9 @@
-import { app, WebContents, RenderProcessGoneDetails } from 'electron'
+import { app, WebContents, RenderProcessGoneDetails, ipcMain } from 'electron'
 import Constants from './utils/Constants'
 import { createErrorWindow, createMainWindow } from './MainRunner'
 import log from 'electron-log/main'
 import { join } from 'path'
+import path from 'node:path'
 
 let mainWindow
 let errorWindow
@@ -14,6 +15,20 @@ const initializeMainLogger = () => {
   })
 
   const appLogFilePath = join(app.getPath('userData'), 'logs', 'applog.log')
+  const {
+    setdbPath,
+    executeQuery,
+    executeMany,
+    executeScript,
+    fetchOne,
+    fetchMany,
+    fetchAll,
+    load_extension,
+    backup,
+    iterdump
+  } = require('sqlite-electron')
+  process.env.APP_ROOT = path.join(__dirname, '../..')
+  const pfad = path.join(process.env.APP_ROOT, 'database/mysqlite3.db')
 
   log.transports.file.resolvePathFn = () =>
     join(app.getPath('userData'), 'logs', 'applog.log')
@@ -54,6 +69,87 @@ app.on('window-all-closed', () => {
 
   if (!Constants.IS_MAC) {
     app.quit()
+  }
+})
+
+ipcMain.handle('connect', async (event, dbPath, isuri, autocommit) => {
+  try {
+    return await setdbPath(pfad, true, true)
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+})
+
+ipcMain.handle('executeQuery', async (event, query, value) => {
+  try {
+    return await executeQuery(query, value)
+  } catch (error) {
+    return error
+  }
+})
+
+ipcMain.handle('fetchone', async (event, query, value) => {
+  try {
+    return await fetchOne(query, value)
+  } catch (error) {
+    return error
+  }
+})
+
+ipcMain.handle('fetchmany', async (event, query, size, value) => {
+  try {
+    return await fetchMany(query, size, value)
+  } catch (error) {
+    return error
+  }
+})
+
+ipcMain.handle('fetchall', async (event, query, value) => {
+  try {
+    return await fetchAll(query, value)
+  } catch (error) {
+    return error
+  }
+})
+
+ipcMain.handle('executeMany', async (event, query, values) => {
+  try {
+    return await executeMany(query, values)
+  } catch (error) {
+    return error
+  }
+})
+
+ipcMain.handle('executeScript', async (event, scriptpath) => {
+  try {
+    return await executeScript(scriptpath)
+  } catch (error) {
+    return error
+  }
+})
+
+ipcMain.handle('load_extension', async (event, path) => {
+  try {
+    return await load_extension(path)
+  } catch (error) {
+    return error
+  }
+})
+
+ipcMain.handle('backup', async (event, target, pages, name, sleep) => {
+  try {
+    return await backup(target, Number(pages), name, Number(sleep))
+  } catch (error) {
+    return error
+  }
+})
+
+ipcMain.handle('iterdump', async (event, path, filter) => {
+  try {
+    return await iterdump(path, filter)
+  } catch (error) {
+    return error
   }
 })
 

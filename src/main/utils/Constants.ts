@@ -43,6 +43,7 @@ export default class Constants {
   static DEFAULT_WEB_PREFERENCES = {
     nodeIntegration: false,
     contextIsolation: true,
+    sandbox: false,
     enableRemoteModule: false,
     preload: join(__dirname, '../preload/index.js')
   }

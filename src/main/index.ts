@@ -4,9 +4,22 @@ import { createErrorWindow, createMainWindow } from './MainRunner'
 import log from 'electron-log/main'
 import { join } from 'path'
 import path from 'node:path'
-
+const {
+  setdbPath,
+  executeQuery,
+  executeMany,
+  executeScript,
+  fetchOne,
+  fetchMany,
+  fetchAll,
+  load_extension,
+  backup,
+  iterdump
+} = require('sqlite-electron')
 let mainWindow
 let errorWindow
+
+//const pfad = path.join(process.env.APP_ROOT, 'database/mysqlite3.db')
 
 const initializeMainLogger = () => {
   log.initialize({
@@ -15,20 +28,8 @@ const initializeMainLogger = () => {
   })
 
   const appLogFilePath = join(app.getPath('userData'), 'logs', 'applog.log')
-  const {
-    setdbPath,
-    executeQuery,
-    executeMany,
-    executeScript,
-    fetchOne,
-    fetchMany,
-    fetchAll,
-    load_extension,
-    backup,
-    iterdump
-  } = require('sqlite-electron')
+
   process.env.APP_ROOT = path.join(__dirname, '../..')
-  const pfad = path.join(process.env.APP_ROOT, 'database/mysqlite3.db')
 
   log.transports.file.resolvePathFn = () =>
     join(app.getPath('userData'), 'logs', 'applog.log')
@@ -55,6 +56,13 @@ app.on('ready', async () => {
   initializeMainLogger()
 
   mainWindow = await createMainWindow()
+  try {
+    return await setdbPath('database/mysqlite3.db', true, true)
+    console.log('gut')
+  } catch (error) {
+    console.log(error)
+    return error
+  }
 })
 
 app.on('activate', async () => {
@@ -74,7 +82,7 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('connect', async (event, dbPath, isuri, autocommit) => {
   try {
-    return await setdbPath(pfad, true, true)
+    return await setdbPath('database/mysqlite3.db', true, true)
   } catch (error) {
     console.log(error)
     return error

@@ -4,7 +4,6 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 // Initialize renderer logger
 log.transports.console.level = 'silly'
 log.transports.console.format = '{h}:{i}:{s}.{ms} {text}'
-
 // Whitelist of valid channels used for IPC communication (Send message from Renderer to Main)
 const mainAvailChannels: string[] = [
   'msgRequestGetVersion',
@@ -72,11 +71,8 @@ contextBridge.exposeInMainWorld('mainApi', {
 
 contextBridge.exposeInMainWorld('api', {
   path: async () => {
-    const path = document.getElementById('dbpath').value
-    const isuri = document.getElementById('isuri').checked
-    const autocommit = document.getElementById('autocommit').checked
     try {
-      const res = await ipcRenderer.invoke('connect', path, isuri, autocommit)
+      const res = await ipcRenderer.invoke('connect')
       document.getElementById('pout').innerText = 'Output: ' + res
     } catch (error) {
       document.getElementById('pout').innerText = 'Output: ' + error

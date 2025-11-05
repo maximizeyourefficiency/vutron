@@ -3,6 +3,8 @@ import { useI18n } from 'vue-i18n'
 import { mdiEmoticonCoolOutline } from '@mdi/js'
 
 const { t } = useI18n()
+
+const api = window.api
 </script>
 
 <template>
@@ -31,24 +33,9 @@ const { t } = useI18n()
     <v-row>
       <v-col cols="12">
         <v-form>
-          <v-text-field
-            id="dbpath"
-            label="Enter the path or name of the database"
-            variant="outlined"
-          />
-          <v-checkbox
-            id="autocommit"
-            label="Want AUTOCOMMIT enabled"
-            value="true"
-          />
-          <v-checkbox
-            id="isuri"
-            label="Is path an SQLITE URI"
-            value="true"
-          />
           <v-btn
             color="primary"
-            @click="window.api.path()"
+            @click="api.path()"
           >
             Enter path of the database
           </v-btn>
@@ -66,7 +53,7 @@ const { t } = useI18n()
           />
           <v-btn
             color="primary"
-            @click="window.api.equery()"
+            @click="api.equery()"
           >
             Execute a Single Query
           </v-btn>
@@ -84,7 +71,7 @@ const { t } = useI18n()
           />
           <v-btn
             color="primary"
-            @click="window.api.fetchall()"
+            @click="api.fetchall()"
           >
             Fetch all records
           </v-btn>
@@ -102,7 +89,7 @@ const { t } = useI18n()
           />
           <v-btn
             color="primary"
-            @click="window.api.fetchone()"
+            @click="api.fetchone()"
           >
             Fetch one record
           </v-btn>

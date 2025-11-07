@@ -19,6 +19,14 @@ export default createRouter({
       }
     },
     {
+      path: '/baustellenverwaltung',
+      component: () =>
+        import('@/renderer/screens/BaustellenverwaltungScreen.vue'),
+      meta: {
+        titleKey: 'title.baustellenverwaltung'
+      }
+    },
+    {
       path: '/error',
       component: () => import('@/renderer/screens/ErrorScreen.vue'),
       meta: {

@@ -12,6 +12,7 @@ const {
   fetchOne,
   fetchMany,
   fetchAll,
+  fetchAllValue,
   load_extension,
   backup,
   iterdump
@@ -99,6 +100,7 @@ ipcMain.handle('executeQuery', async (event, query, value) => {
 
 ipcMain.handle('fetchone', async (event, query, value) => {
   try {
+    console.log()
     return await fetchOne(query, value)
   } catch (error) {
     return error
@@ -114,6 +116,16 @@ ipcMain.handle('fetchmany', async (event, query, size, value) => {
 })
 
 ipcMain.handle('fetchall', async (event, query, value) => {
+  try {
+    console.log('main.ts:')
+    console.log('index.ts:' + query)
+    console.log('index.ts:' + value)
+    return await fetchAll(query, value)
+  } catch (error) {
+    return error
+  }
+})
+ipcMain.handle('fetchAllValue', async (event, query, value) => {
   try {
     return await fetchAll(query, value)
   } catch (error) {

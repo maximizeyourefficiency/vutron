@@ -73,20 +73,27 @@ contextBridge.exposeInMainWorld('api', {
   path: async () => {
     try {
       const res = await ipcRenderer.invoke('connect')
-      document.getElementById('pout').innerText = 'Output: ' + res
+      console.log('Output: ' + res)
     } catch (error) {
-      document.getElementById('pout').innerText = 'Output: ' + error
+      console.log('Output: ' + error)
     }
   },
   equery: async () => {
-    const query = document.getElementById('singlequery').value
-    const values = document.getElementById('value').value
+    //const query = document.getElementById('singlequery').value
+    //const values = document.getElementById('value').value
     try {
-      const arr = JSON.parse('[' + values + ']')
-      const res = await ipcRenderer.invoke('executeQuery', query, arr[0])
-      document.getElementById('pout1').innerText = 'Output: ' + res
+      //const arr = JSON.parse('[' + values + ']')
+      const res = await ipcRenderer.invoke(
+        'executeQuery',
+        'SELECT * FROM tblbauleiter'
+        //arr[0]
+      )
+      console.log(res)
+      //const res = await ipcRenderer.invoke('executeQuery', query, arr[0])
+      //document.getElementById('pout1').innerText = 'Output: ' + res
     } catch (error) {
-      document.getElementById('pout1').innerText = 'Output: ' + error
+      console.log(error)
+      //document.getElementById('pout1').innerText = 'Output: ' + error
     }
   },
   fetchall: async () => {
@@ -107,10 +114,22 @@ contextBridge.exposeInMainWorld('api', {
     try {
       const arr = JSON.parse('[' + values + ']')
       const res = await ipcRenderer.invoke('fetchone', query, arr[0])
-      document.getElementById('poutfo').innerText =
-        'Output: ' + JSON.stringify(res)
+      //document.getElementById('poutfo').innerText =
+      console.log('Output: ' + JSON.stringify(res))
     } catch (error) {
       document.getElementById('poutfo').innerText = 'Output: ' + error
+    }
+  },
+  fetchalltest: async (query) => {
+    try {
+      const arr = JSON.parse('[' + query + ']')
+      console.log('preload query:' + query)
+      console.log('preload arr0:' + arr[0])
+      console.log('preload arr1:' + JSON.stringify(arr[1]))
+      const res = await ipcRenderer.invoke('fetchall', arr[0], arr[1])
+      console.log('preload res:' + JSON.stringify(res))
+    } catch (error) {
+      console.log('Output: ' + error)
     }
   },
   fetchmany: async () => {

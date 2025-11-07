@@ -8,6 +8,7 @@
   "title": {
     "main": "Hauptbildschirm",
     "second": "Zweiter Bildschirm",
+    "baustellenverwaltung": "Baustellenverwaltung",
     "error": "Ein Fehler ist aufgetreten"
   },
   "menu": {

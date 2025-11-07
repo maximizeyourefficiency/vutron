@@ -113,7 +113,7 @@ const api = window.api
           />
           <v-btn
             color="primary"
-            @click="window.api.fetchmany()"
+            @click="api.fetchmany()"
           >
             Fetch multiple records
           </v-btn>
@@ -131,7 +131,7 @@ const api = window.api
           />
           <v-btn
             color="primary"
-            @click="window.api.mquery()"
+            @click="api.mquery()"
           >
             Execute Multiple Query
           </v-btn>
@@ -144,7 +144,7 @@ const api = window.api
           />
           <v-btn
             color="primary"
-            @click="window.api.escript()"
+            @click="api.escript()"
           >
             Execute SQL Script
           </v-btn>
@@ -157,7 +157,7 @@ const api = window.api
           />
           <v-btn
             color="primary"
-            @click="window.api.load_extension()"
+            @click="api.load_extension()"
           >
             Load Extension
           </v-btn>
@@ -190,7 +190,7 @@ const api = window.api
           />
           <v-btn
             color="primary"
-            @click="window.api.backup()"
+            @click="api.backup()"
           >
             Backup
           </v-btn>
@@ -208,7 +208,7 @@ const api = window.api
           />
           <v-btn
             color="primary"
-            @click="window.api.iterdump()"
+            @click="api.iterdump()"
           >
             Iterdump
           </v-btn>

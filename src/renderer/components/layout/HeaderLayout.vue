@@ -31,6 +31,11 @@ const headerMenus: {
     icon: mdiFitToScreenOutline,
     text: 'title.second',
     path: '/second'
+  },
+  {
+    icon: mdiFitToScreenOutline,
+    text: 'title.baustellenverwaltung',
+    path: '/baustellenverwaltung'
   }
 ]
 </script>

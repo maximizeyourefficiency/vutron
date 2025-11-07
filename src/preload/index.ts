@@ -120,13 +120,15 @@ contextBridge.exposeInMainWorld('api', {
       document.getElementById('poutfo').innerText = 'Output: ' + error
     }
   },
-  fetchalltest: async (query) => {
+  fetchalltest: async (query, params) => {
     try {
-      const arr = JSON.parse('[' + query + ']')
       console.log('preload query:' + query)
-      console.log('preload arr0:' + arr[0])
-      console.log('preload arr1:' + JSON.stringify(arr[1]))
-      const res = await ipcRenderer.invoke('fetchall', arr[0], arr[1])
+      console.log('preload arr0:' + params)
+      const res = await ipcRenderer.invoke(
+        'fetchall',
+        JSON.parse(query),
+        params
+      )
       console.log('preload res:' + JSON.stringify(res))
     } catch (error) {
       console.log('Output: ' + error)

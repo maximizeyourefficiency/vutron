@@ -68,7 +68,8 @@ async function loaddb() {
 
 async function loadBauleiter() {
   const data = await window.api.fetchalltest(
-    '"SELECT * FROM tblbauleiter WHERE Bauleiter_ID = ?", "2"'
+    ['"SELECT * FROM tblbauleiter WHERE Bauleiter_ID = ?"'],
+    [2]
   )
   console.log(data)
 }

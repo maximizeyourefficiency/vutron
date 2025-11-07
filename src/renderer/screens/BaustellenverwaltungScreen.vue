@@ -67,29 +67,12 @@ async function loaddb() {
 }
 
 async function loadBauleiter() {
-  const data = await window.api.fetchalltest(
+  const data = await window.api.fetchallvalue(
     ['"SELECT * FROM tblbauleiter WHERE Bauleiter_ID = ?"'],
     [2]
   )
   console.log(data)
 }
-/* Funktion zum Laden der Daten aus SQLite
-async function path() {
-  try {
-    baustellen.value = await window.api.connect()
-  } catch (err) {
-    console.error('Fehler beim Laden der Daten:', err)
-  }
-}
-async function loadData() {
-  try {
-    baustellen.value = await window.api.equery()
-    console.log(baustellen.value)
-  } catch (err) {
-    console.error('Fehler beim Laden der Daten:', err)
-  }
-}
-*/
 </script>
 
 <style scoped>

@@ -120,12 +120,12 @@ contextBridge.exposeInMainWorld('api', {
       document.getElementById('poutfo').innerText = 'Output: ' + error
     }
   },
-  fetchalltest: async (query, params) => {
+  fetchallvalue: async (query, params) => {
     try {
       console.log('preload query:' + query)
-      console.log('preload arr0:' + params)
+      console.log('preload params:' + params)
       const res = await ipcRenderer.invoke(
-        'fetchall',
+        'fetchAllValue',
         JSON.parse(query),
         params
       )

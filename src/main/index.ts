@@ -115,12 +115,11 @@ ipcMain.handle('fetchmany', async (event, query, size, value) => {
   }
 })
 
-ipcMain.handle('fetchall', async (event, query, value) => {
+ipcMain.handle('fetchall', async (event, query) => {
   try {
     console.log('main.ts:')
     console.log('index.ts:' + query)
-    console.log('index.ts:' + value)
-    return await fetchAll(query, value)
+    return await fetchAll(query)
   } catch (error) {
     return error
   }

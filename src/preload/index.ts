@@ -96,16 +96,13 @@ contextBridge.exposeInMainWorld('api', {
       //document.getElementById('pout1').innerText = 'Output: ' + error
     }
   },
-  fetchall: async () => {
-    const query = document.getElementById('fetchallquery').value
-    const values = document.getElementById('fetchallvalue').value
+  fetchall: async (query) => {
     try {
-      const arr = JSON.parse('[' + values + ']')
-      const res = await ipcRenderer.invoke('fetchall', query, arr[0])
-      document.getElementById('poutfa').innerText =
-        'Output: ' + JSON.stringify(res)
+      console.log('preload query:' + query)
+      const res = await ipcRenderer.invoke('fetchAllValue', JSON.parse(query))
+      console.log('preload res:' + JSON.stringify(res))
     } catch (error) {
-      document.getElementById('poutfa').innerText = 'Output: ' + error
+      console.log('Output: ' + error)
     }
   },
   fetchone: async () => {

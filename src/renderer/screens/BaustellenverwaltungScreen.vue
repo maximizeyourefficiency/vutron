@@ -3,27 +3,23 @@
     <v-container>
       <h1 class="mb-4"> Baustellenübersicht </h1>
 
-      <!-- Button zum Laden der Daten -->
-      <v-btn
-        color="primary"
+      <!-- Suchfeld -->
+      <v-text-field
+        v-model="search"
+        label="Search"
+        prepend-inner-icon="mdi-magnify"
+        variant="outlined"
+        hide-details
+        single-line
         class="mb-4"
-        @click="loaddb"
-      >
-        Datenbank laden
-      </v-btn>
-      <!-- Button zum Laden der Daten -->
-      <v-btn
-        color="primary"
-        class="mb-4"
-        @click="loadBauleiter"
-      >
-        fetchonetest
-      </v-btn>
-      <!-- Tabelle mit den Baustellen -->
+      />
+
+      <!-- Tabelle -->
       <v-data-table
         :headers="headers"
         :items="baustellen"
-        :items-per-page="10"
+        :search="search"
+        :items-per-page="50"
         class="elevation-1"
       >
         <template #no-data>
@@ -32,8 +28,7 @@
             border="start"
             prominent
           >
-            Keine Daten geladen. Bitte oben auf
-            <strong>"Daten laden"</strong> klicken.
+            Keine Daten geladen.
           </v-alert>
         </template>
       </v-data-table>
@@ -42,17 +37,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
-// Reaktive Variable für Daten
+const search = ref('') // <-- neu
 const baustellen = ref([])
-// Tabellenkopfdefinition
+
 const headers = [
   { title: 'ID', key: 'Baustellen_ID' },
   { title: 'Nummer', key: 'Baustellennummer' },
+  { title: 'Jahr', key: 'Jahr' },
+  { title: 'AG kurz', key: 'AG_Name' },
   { title: 'PLZ', key: 'PLZ' },
   { title: 'Ort', key: 'Ort' },
   { title: 'Straße', key: 'Straße' },
+  { title: 'Ost', key: 'Ost' },
   { title: 'Baubeginn', key: 'Baubeginn' },
   { title: 'Bauende', key: 'Bauende' },
   { title: 'Beendet', key: 'Beendet' },
@@ -62,17 +60,22 @@ const headers = [
   { title: 'Letzte Rechnung', key: 'letzteRechnung' }
 ]
 
-async function loaddb() {
-  window.api.path()
+async function loadBaustellen() {
+  try {
+    const result = await window.api.fetchall(
+      'SELECT * FROM (tblbaustellen LEFT JOIN tblbauleiter ON tblbaustellen.Bauleiter_ID_F = tblbauleiter.Bauleiter_ID) INNER JOIN tblAG ON tblbaustellen.AG_ID_F = tblAG.AG_ID WHERE (((tblbaustellen.Baustellen_ID) NOT BETWEEN 3734 AND 3738 AND tblbaustellen.Baustellen_ID <> 4361)) ORDER BY tblbaustellen.Baustellennummer DESC'
+    )
+    if (Array.isArray(result)) {
+      baustellen.value = result
+    }
+  } catch (err) {
+    console.error('Fehler beim Laden:', err)
+  }
 }
 
-async function loadBauleiter() {
-  const data = await window.api.fetchall(
-    ['"SELECT * FROM tblbauleiter"'] //WHERE Bauleiter_ID = ?"'],
-    //[2]
-  )
-  console.log(data)
-}
+onMounted(() => {
+  loadBaustellen()
+})
 </script>
 
 <style scoped>

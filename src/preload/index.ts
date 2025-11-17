@@ -98,11 +98,22 @@ contextBridge.exposeInMainWorld('api', {
   },
   fetchall: async (query) => {
     try {
-      console.log('preload query:' + query)
-      const res = await ipcRenderer.invoke('fetchAllValue', JSON.parse(query))
-      console.log('preload res:' + JSON.stringify(res))
+      console.log('preload query:', query)
+      let payload
+      try {
+        // wenn query ein JSON-string ist -> parsed array/object
+        payload = JSON.parse(query)
+      } catch (e) {
+        // kein JSON -> sende den rohen String weiter (z.B. "SELECT ...")
+        payload = query
+      }
+      const res = await ipcRenderer.invoke('fetchAllValue', payload)
+      console.log('preload res:', JSON.stringify(res))
+      return res
     } catch (error) {
-      console.log('Output: ' + error)
+      console.error('preload fetchall error:', error)
+      // optional: return [] oder throw weiter
+      throw error
     }
   },
   fetchone: async () => {
@@ -117,20 +128,35 @@ contextBridge.exposeInMainWorld('api', {
       document.getElementById('poutfo').innerText = 'Output: ' + error
     }
   },
-  fetchallvalue: async (query, params) => {
+// Robuste Version wie fetchall, aber für fetchallvalue (mit params)
+
+fetchallvalue: async (query, params) => {
+  try {
+    console.log('preload query:', query)
+    console.log('preload params:', params)
+
+    let payload
     try {
-      console.log('preload query:' + query)
-      console.log('preload params:' + params)
-      const res = await ipcRenderer.invoke(
-        'fetchAllValue',
-        JSON.parse(query),
-        params
-      )
-      console.log('preload res:' + JSON.stringify(res))
-    } catch (error) {
-      console.log('Output: ' + error)
+      // Falls query ein JSON-String ist → JSON.parse
+      payload = JSON.parse(query)
+    } catch (e) {
+      // Falls kein JSON, rohen String weitergeben
+      payload = query
     }
-  },
+
+    const res = await ipcRenderer.invoke(
+      'fetchAllValue',
+      payload,
+      params
+    )
+
+    console.log('preload res:', JSON.stringify(res))
+    return res
+  } catch (error) {
+    console.error('fetchallvalue error:', error)
+    throw error
+  }
+},
   fetchmany: async () => {
     const query = document.getElementById('fetchmanyquery').value
     const values = document.getElementById('fetchmanyvalue').value

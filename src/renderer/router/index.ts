@@ -12,18 +12,18 @@ export default createRouter({
       }
     },
     {
-      path: '/second',
-      component: () => import('@/renderer/screens/SecondScreen.vue'),
+      path: '/personal',
+      component: () => import('@/renderer/screens/PersonalScreen.vue'),
       meta: {
-        titleKey: 'title.second'
+        titleKey: 'title.personal'
       }
     },
     {
-      path: '/baustellenverwaltung',
+      path: '/baustellen',
       component: () =>
         import('@/renderer/screens/BaustellenverwaltungScreen.vue'),
       meta: {
-        titleKey: 'title.baustellenverwaltung'
+        titleKey: 'title.baustellen'
       }
     },
     {

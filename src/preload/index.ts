@@ -128,35 +128,31 @@ contextBridge.exposeInMainWorld('api', {
       document.getElementById('poutfo').innerText = 'Output: ' + error
     }
   },
-// Robuste Version wie fetchall, aber für fetchallvalue (mit params)
+  // Robuste Version wie fetchall, aber für fetchallvalue (mit params)
 
-fetchallvalue: async (query, params) => {
-  try {
-    console.log('preload query:', query)
-    console.log('preload params:', params)
-
-    let payload
+  fetchallvalue: async (query, params) => {
     try {
-      // Falls query ein JSON-String ist → JSON.parse
-      payload = JSON.parse(query)
-    } catch (e) {
-      // Falls kein JSON, rohen String weitergeben
-      payload = query
+      console.log('preload query:', query)
+      console.log('preload params:', params)
+
+      let payload
+      try {
+        // Falls query ein JSON-String ist → JSON.parse
+        payload = JSON.parse(query)
+      } catch (e) {
+        // Falls kein JSON, rohen String weitergeben
+        payload = query
+      }
+
+      const res = await ipcRenderer.invoke('fetchAllValue', payload, params)
+
+      console.log('preload res:', JSON.stringify(res))
+      return res
+    } catch (error) {
+      console.error('fetchallvalue error:', error)
+      throw error
     }
-
-    const res = await ipcRenderer.invoke(
-      'fetchAllValue',
-      payload,
-      params
-    )
-
-    console.log('preload res:', JSON.stringify(res))
-    return res
-  } catch (error) {
-    console.error('fetchallvalue error:', error)
-    throw error
-  }
-},
+  },
   fetchmany: async () => {
     const query = document.getElementById('fetchmanyquery').value
     const values = document.getElementById('fetchmanyvalue').value

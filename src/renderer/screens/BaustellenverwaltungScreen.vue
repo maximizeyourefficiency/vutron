@@ -1,12 +1,12 @@
 <template>
   <v-app>
-    <v-container>
+    <v-container fluid>
       <h1 class="mb-4"> Baustellenübersicht </h1>
 
       <!-- Suchfeld -->
       <v-text-field
         v-model="search"
-        label="Search"
+        label="Suche"
         prepend-inner-icon="mdi-magnify"
         variant="outlined"
         hide-details
@@ -19,9 +19,31 @@
         :headers="headers"
         :items="baustellen"
         :search="search"
-        :items-per-page="50"
+        :items-per-page="100"
         class="elevation-1"
       >
+        <!-- Checkbox für OST -->
+        <template #[`item.Ost`]="{ item }">
+          <v-checkbox
+            v-model="item.Ost"
+            :true-value="1"
+            :false-value="0"
+            density="compact"
+            hide-details
+            disabled
+          />
+        </template>
+        <template #[`item.Beendet`]="{ item }">
+          <v-checkbox
+            v-model="item.Beendet"
+            :true-value="1"
+            :false-value="0"
+            density="compact"
+            hide-details
+            disabled
+          />
+        </template>
+
         <template #no-data>
           <v-alert
             type="info"
@@ -43,14 +65,14 @@ const search = ref('') // <-- neu
 const baustellen = ref([])
 
 const headers = [
-  { title: 'ID', key: 'Baustellen_ID' },
+  //{ title: 'ID', key: 'Baustellen_ID' },
   { title: 'Nummer', key: 'Baustellennummer' },
   { title: 'Jahr', key: 'Jahr' },
   { title: 'AG kurz', key: 'AG_Name' },
   { title: 'PLZ', key: 'PLZ' },
   { title: 'Ort', key: 'Ort' },
   { title: 'Straße', key: 'Straße' },
-  { title: 'Ost', key: 'Ost' },
+  { title: 'Ost', key: 'Ost', sortable: false },
   { title: 'Baubeginn', key: 'Baubeginn' },
   { title: 'Bauende', key: 'Bauende' },
   { title: 'Beendet', key: 'Beendet' },

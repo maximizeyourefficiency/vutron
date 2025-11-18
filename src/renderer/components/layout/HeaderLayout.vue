@@ -29,13 +29,13 @@ const headerMenus: {
   },
   {
     icon: mdiFitToScreenOutline,
-    text: 'title.second',
-    path: '/second'
+    text: 'title.personal',
+    path: '/personal'
   },
   {
     icon: mdiFitToScreenOutline,
-    text: 'title.baustellenverwaltung',
-    path: '/baustellenverwaltung'
+    text: 'title.baustellen',
+    path: '/baustellen'
   }
 ]
 </script>

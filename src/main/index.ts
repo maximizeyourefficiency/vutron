@@ -59,7 +59,6 @@ app.on('ready', async () => {
   mainWindow = await createMainWindow()
   try {
     return await setdbPath('database/mysqlite3.db', true, true)
-    console.log('gut')
   } catch (error) {
     console.log(error)
     return error
@@ -115,15 +114,34 @@ ipcMain.handle('fetchmany', async (event, query, size, value) => {
   }
 })
 
-ipcMain.handle('fetchall', async (event, query) => {
+fetchall: async (query: string | object): Promise<any> => {
   try {
-    console.log('main.ts:')
-    console.log('index.ts:' + query)
-    return await fetchAll(query)
+    let payload: string | object = query
+
+    // Versuche, query als JSON zu parsen, falls es ein JSON-String ist
+    if (typeof query === 'string') {
+      try {
+        payload = JSON.parse(query)
+      } catch (e) {
+        // kein JSON -> roher String bleibt payload
+      }
+    }
+
+    const res = await ipcRenderer.invoke('fetchAllValue', payload)
+
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[IPC_FETCHALL::fetchAllValue]', {
+        request: payload,
+        result: res
+      })
+    }
+
+    return res
   } catch (error) {
-    return error
+    console.error('preload fetchall error:', error)
+    throw error
   }
-})
+}
 ipcMain.handle('fetchAllValue', async (event, query, value) => {
   try {
     return await fetchAll(query, value)

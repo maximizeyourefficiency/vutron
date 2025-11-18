@@ -10,7 +10,7 @@ import pinia from '@/renderer/plugins/pinia'
 declare global {
   interface Window {
     mainApi?: any
-    api: {
+    /*api: {
       connect: (
         path: string,
         isuri: boolean,
@@ -30,7 +30,7 @@ declare global {
         sleep: number
       ) => Promise<any>
       iterdump: (path: string, filter: string) => Promise<any>
-    }
+    }*/
   }
 }
 

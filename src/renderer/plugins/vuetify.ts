@@ -12,7 +12,8 @@ import {
   pt,
   nl
 } from 'vuetify/locale'
-import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
+//import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
+import { aliases, mdi } from 'vuetify/iconsets/mdi' // nicht mdi-svg
 import 'vuetify/styles'
 
 import colors from 'vuetify/util/colors'

@@ -98,7 +98,7 @@ contextBridge.exposeInMainWorld('api', {
   },
   fetchall: async (query) => {
     try {
-      console.log('preload query:', query)
+      //console.log('preload query:', query)
       let payload
       try {
         // wenn query ein JSON-string ist -> parsed array/object

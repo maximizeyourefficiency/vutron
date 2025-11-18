@@ -1,6 +1,6 @@
 import ErrorScreen from '@/renderer/screens/ErrorScreen.vue'
 import MainScreen from '@/renderer/screens/MainScreen.vue'
 import PersonalScreen from '@/renderer/screens/PersonalScreen.vue'
-import BaustellenverwaltungScreen from '@/renderer/screens/BaustellenverwaltungScreen.vue'
+import BaustellenScreen from '@/renderer/screens/BaustellenScreen.vue'
 
-export { ErrorScreen, MainScreen, PersonalScreen, BaustellenverwaltungScreen }
+export { ErrorScreen, MainScreen, PersonalScreen, BaustellenScreen }

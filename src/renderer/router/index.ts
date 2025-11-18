@@ -20,8 +20,7 @@ export default createRouter({
     },
     {
       path: '/baustellen',
-      component: () =>
-        import('@/renderer/screens/BaustellenverwaltungScreen.vue'),
+      component: () => import('@/renderer/screens/BaustellenScreen.vue'),
       meta: {
         titleKey: 'title.baustellen'
       }

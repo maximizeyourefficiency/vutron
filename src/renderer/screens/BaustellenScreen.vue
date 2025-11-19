@@ -7,12 +7,12 @@
       <v-row class="mb-4">
         <v-col
           cols="12"
-          md="3"
+          sm="auto"
         >
-          <v-card>
-            <v-card-text>
+          <v-card @click="loadMoreBaustellen">
+            <v-card-text class="py-2 px-4">
               <div class="text-caption"> Geladen </div>
-              <div class="text-h6">
+              <div class="text-subtitle-1 font-weight-medium">
                 {{ baustellen.length }} / {{ totalCount }}
               </div>
             </v-card-text>
@@ -31,7 +31,6 @@
         class="mb-4"
         clearable
       />
-
       <!-- Tabelle -->
       <v-data-table
         :headers="headers"

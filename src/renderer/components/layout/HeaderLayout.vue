@@ -41,7 +41,7 @@ const headerMenus: {
 </script>
 <template>
   <v-app-bar
-    color="primary"
+    color="orange"
     density="compact"
   >
     <v-app-bar-title>{{ t(titleKey) }}</v-app-bar-title>

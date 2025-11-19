@@ -78,22 +78,27 @@ contextBridge.exposeInMainWorld('api', {
       console.log('Output: ' + error)
     }
   },
-  equery: async () => {
-    //const query = document.getElementById('singlequery').value
-    //const values = document.getElementById('value').value
+  equery: async (query, params) => {
     try {
-      //const arr = JSON.parse('[' + values + ']')
-      const res = await ipcRenderer.invoke(
-        'executeQuery',
-        'SELECT * FROM tblbauleiter'
-        //arr[0]
-      )
-      console.log(res)
-      //const res = await ipcRenderer.invoke('executeQuery', query, arr[0])
-      //document.getElementById('pout1').innerText = 'Output: ' + res
+      console.log('preload query:', query)
+      console.log('preload params:', params)
+
+      let payload
+      try {
+        // Falls query ein JSON-String ist → JSON.parse
+        payload = JSON.parse(query)
+      } catch (e) {
+        // Falls kein JSON, rohen String weitergeben
+        payload = query
+      }
+
+      const res = await ipcRenderer.invoke('executeQuery', payload, params)
+
+      console.log('preload res:', JSON.stringify(res))
+      return res
     } catch (error) {
-      console.log(error)
-      //document.getElementById('pout1').innerText = 'Output: ' + error
+      console.error('executeQuery error:', error)
+      throw error
     }
   },
   fetchall: async (query) => {

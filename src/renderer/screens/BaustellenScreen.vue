@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-container fluid>
-      <h1 class="mb-4"> Baustellenübersicht </h1>
+      <h1 class="mb-4">Baustellenübersicht</h1>
 
       <!-- Statistik -->
       <v-row class="mb-4">
@@ -9,9 +9,30 @@
           cols="12"
           sm="auto"
         >
-          <v-card @click="loadMoreBaustellen">
+          <v-card
+            class="cursor-pointer"
+            hover
+            @click="loadMoreBaustellen"
+          >
             <v-card-text class="py-2 px-4">
-              <div class="text-caption"> Geladen </div>
+              <div class="text-caption">Geladen</div>
+              <div class="text-subtitle-1 font-weight-medium">
+                {{ baustellen.length }} / {{ totalCount }}
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+        <v-col
+          cols="12"
+          sm="auto"
+        >
+          <v-card
+            class="cursor-pointer"
+            hover
+            @click="addBaustelle"
+          >
+            <v-card-text class="py-2 px-4">
+              <div class="text-caption">Geladen</div>
               <div class="text-subtitle-1 font-weight-medium">
                 {{ baustellen.length }} / {{ totalCount }}
               </div>
@@ -31,6 +52,7 @@
         class="mb-4"
         clearable
       />
+
       <!-- Tabelle -->
       <v-data-table
         :headers="headers"
@@ -42,6 +64,15 @@
         :page="page"
         @update:page="page = $event"
       >
+        <template #[`item.actions`]="{ item }">
+          <v-btn
+            icon
+            @click="openEditDialog(item)"
+          >
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+        </template>
+
         <!-- Checkbox für OST -->
         <template #[`item.Ost`]="{ item }">
           <v-chip
@@ -61,6 +92,7 @@
             −
           </v-chip>
         </template>
+
         <!-- Checkbox für Beendet -->
         <template #[`item.Beendet`]="{ item }">
           <v-chip
@@ -80,7 +112,8 @@
             −
           </v-chip>
         </template>
-        <!-- Checkbox für Beendet -->
+
+        <!-- Checkbox für Abgerechnet -->
         <template #[`item.Abgerechnet`]="{ item }">
           <v-chip
             v-if="item.Abgerechnet == -1"
@@ -99,6 +132,7 @@
             −
           </v-chip>
         </template>
+
         <template #no-data>
           <v-alert
             type="info"
@@ -135,7 +169,7 @@
               size="small"
               @click="loadMoreBaustellen"
             >
-              <v-icon start> mdi-download </v-icon>
+              <v-icon start>mdi-download</v-icon>
               Mehr laden ({{ remainingCount }})
             </v-btn>
             <div
@@ -146,6 +180,238 @@
         </template>
       </v-data-table>
     </v-container>
+
+    <!-- Edit Dialog -->
+    <v-dialog
+      v-model="editDialog"
+      max-width="800px"
+      persistent
+    >
+      <v-card>
+        <v-card-title class="text-h5 bg-primary">
+          Baustelle bearbeiten
+        </v-card-title>
+
+        <v-card-text class="pt-4">
+          <v-form ref="editForm">
+            <v-row>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="editedItem.Baustellennummer"
+                  label="Baustellennummer"
+                  variant="outlined"
+                  density="compact"
+                  readonly
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="editedItem.Jahr"
+                  label="Jahr"
+                  variant="outlined"
+                  density="compact"
+                  type="number"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="editedItem.AG_Name"
+                  label="Auftraggeber"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="editedItem.PLZ"
+                  label="PLZ"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="5"
+              >
+                <v-text-field
+                  v-model="editedItem.Ort"
+                  label="Ort"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.Straße"
+                  label="Straße"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="editedItem.Baubeginn"
+                  label="Baubeginn"
+                  variant="outlined"
+                  density="compact"
+                  type="date"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="editedItem.Bauende"
+                  label="Bauende"
+                  variant="outlined"
+                  density="compact"
+                  type="date"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-checkbox
+                  v-model="editedItem.Ost"
+                  color="orange"
+                  label="Ost"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-checkbox
+                  v-model="editedItem.Beendet"
+                  label="Beendet"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-checkbox
+                  v-model="editedItem.Abgerechnet"
+                  label="Abgerechnet"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="editedItem.Stunden"
+                  label="Stunden"
+                  variant="outlined"
+                  density="compact"
+                  type="number"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="editedItem.letzteRechnung"
+                  label="Letzte Rechnung"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="editedItem.Bemerkung"
+                  label="Bemerkung"
+                  variant="outlined"
+                  density="compact"
+                  rows="3"
+                />
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="closeEditDialog"
+          >
+            Abbrechen
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="elevated"
+            :loading="saving"
+            @click="saveItem"
+          >
+            Speichern
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Snackbar für Benachrichtigungen -->
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+    >
+      {{ snackbarText }}
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="snackbar = false"
+        >
+          Schließen
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -157,13 +423,25 @@ const baustellen = ref([])
 const loading = ref(false)
 const totalCount = ref(0)
 const currentOffset = ref(0)
-const pageSize = 2000 // Anzahl pro Ladevorgang
-const itemsPerPage = ref(50) // Anzeige pro Seite in der Tabelle
+const pageSize = 2000
+const itemsPerPage = ref(50)
 const page = ref(1)
+
+// Edit Dialog
+const editDialog = ref(false)
+const editedItem = ref({})
+const editedIndex = ref(-1)
+const saving = ref(false)
+
+// Snackbar
+const snackbar = ref(false)
+const snackbarText = ref('')
+const snackbarColor = ref('success')
 
 let loadLock = false
 
 const headers = [
+  { title: '', key: 'actions', sortable: false, width: '70px' },
   { title: 'Nummer', key: 'Baustellennummer' },
   { title: 'Jahr', key: 'Jahr' },
   { title: 'AG kurz', key: 'AG_Name' },
@@ -180,7 +458,6 @@ const headers = [
   { title: 'Letzte Rechnung', key: 'letzteRechnung' }
 ]
 
-// Gefilterte Baustellen basierend auf Suche
 const filteredBaustellen = computed(() => {
   if (!search.value) return baustellen.value
 
@@ -192,22 +469,82 @@ const filteredBaustellen = computed(() => {
   })
 })
 
-// Seitenanzahl berechnen
 const pageCount = computed(() => {
   return Math.ceil(filteredBaustellen.value.length / itemsPerPage.value)
 })
 
-// Prüfen ob mehr Daten verfügbar sind
 const hasMoreData = computed(() => {
   return currentOffset.value < totalCount.value
 })
 
-// Verbleibende Datensätze
 const remainingCount = computed(() => {
   return Math.max(0, totalCount.value - currentOffset.value)
 })
 
-// Gesamtanzahl der Baustellen ermitteln
+// Edit Dialog Funktionen
+function openEditDialog(item) {
+  editedIndex.value = baustellen.value.indexOf(item)
+  editedItem.value = { ...item }
+  editDialog.value = true
+}
+
+function closeEditDialog() {
+  editDialog.value = false
+  setTimeout(() => {
+    editedItem.value = {}
+    editedIndex.value = -1
+  }, 300)
+}
+
+async function saveItem() {
+  saving.value = true
+
+  try {
+    // Hier würde normalerweise ein API-Aufruf zum Speichern erfolgen
+    // Beispiel:
+    await window.api.equery(
+      `UPDATE tblbaustellen SET
+         Jahr = ?, PLZ = ?, Ort = ?, Straße = ?,
+         Ost = ?, Baubeginn = ?, Bauende = ?, Beendet = ?,
+         Stunden = ?, Abgerechnet = ?, Bemerkung = ?, letzteRechnung = ?
+       WHERE Baustellen_ID = ${editedItem.value.Baustellen_ID}`,
+      [
+        editedItem.value.Jahr,
+        editedItem.value.PLZ,
+        editedItem.value.Jahr,
+        editedItem.value.Straße,
+        editedItem.value.Ost,
+        editedItem.value.Baubeginn,
+        editedItem.value.Bauende,
+        editedItem.value.Beendet,
+        editedItem.value.Stunden,
+        editedItem.value.Abgerechnet,
+        editedItem.value.Bemerkung,
+        editedItem.value.letzteRechnung
+      ]
+    )
+
+    // Aktualisiere das Item in der lokalen Liste
+    if (editedIndex.value > -1) {
+      Object.assign(baustellen.value[editedIndex.value], editedItem.value)
+    }
+
+    showSnackbar('Baustelle erfolgreich gespeichert', 'success')
+    closeEditDialog()
+  } catch (err) {
+    console.error('[Baustellen] Fehler beim Speichern:', err)
+    showSnackbar('Fehler beim Speichern der Baustelle', 'error')
+  } finally {
+    saving.value = false
+  }
+}
+
+function showSnackbar(text, color = 'success') {
+  snackbarText.value = text
+  snackbarColor.value = color
+  snackbar.value = true
+}
+
 async function getTotalCount() {
   try {
     const result = await window.api.fetchall(
@@ -226,7 +563,6 @@ async function getTotalCount() {
   }
 }
 
-// Initiales Laden der ersten Baustellen
 async function loadBaustellen() {
   if (loadLock) {
     console.debug('[Baustellen] Load bereits aktiv')
@@ -238,12 +574,11 @@ async function loadBaustellen() {
   console.debug('[Baustellen] Initial load start')
 
   try {
-    // Erst Gesamtanzahl ermitteln
     await getTotalCount()
 
-    // Dann erste Daten laden
     const result = await window.api.fetchall(
-      `SELECT 
+      `SELECT
+        tblbaustellen.Baustellen_ID,
         tblbaustellen.Baustellennummer,
         tblbaustellen.Jahr,
         tblAG.AG_Name,
@@ -283,7 +618,6 @@ async function loadBaustellen() {
   }
 }
 
-// Weitere Baustellen nachladen
 async function loadMoreBaustellen() {
   if (loadLock || !hasMoreData.value) {
     return
@@ -350,5 +684,9 @@ onBeforeUnmount(() => {
 <style scoped>
 h1 {
   font-weight: 500;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

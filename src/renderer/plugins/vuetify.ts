@@ -12,10 +12,10 @@ import {
   pt,
   nl
 } from 'vuetify/locale'
-//import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
-import { aliases, mdi } from 'vuetify/iconsets/mdi' // nicht mdi-svg
+import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
+//import { aliases, mdi } from 'vuetify/iconsets/mdi' // nicht mdi-svg
 import 'vuetify/styles'
-
+import { VIconBtn } from 'vuetify/labs/VIconBtn'
 import colors from 'vuetify/util/colors'
 
 export default createVuetify({
@@ -23,6 +23,9 @@ export default createVuetify({
     messages: { ko, en, zhHans, zhHant, de, es, ja, fr, ru, pt, nl },
     locale: 'en',
     fallback: 'en'
+  },
+  components: {
+    VIconBtn
   },
   defaults: {
     VBtn: {
@@ -46,13 +49,13 @@ export default createVuetify({
       light: {
         dark: false,
         colors: {
-          primary: colors.green.darken2
+          primary: colors.orange.darken2
         }
       },
       dark: {
         dark: true,
         colors: {
-          primary: colors.green.darken4
+          primary: colors.orange.darken2
         }
       }
     }

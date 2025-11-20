@@ -29,7 +29,7 @@
           <v-card
             class="cursor-pointer"
             hover
-            @click="addBaustelle"
+            @click="openEditDialog(item)"
           >
             <v-card-text class="py-2 px-4">
               <div class="text-caption"> Hinzufügen </div>
@@ -65,10 +65,7 @@
         @update:page="page = $event"
       >
         <template #[`item.actions`]="{ item }">
-          <v-btn
-            icon
-            @click="openEditDialog(item)"
-          >
+          <v-btn @click="openEditDialog(item)">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
         </template>
@@ -180,7 +177,220 @@
         </template>
       </v-data-table>
     </v-container>
+    <!-- Add Dialog -->
+    <v-dialog
+      v-model="addDialog"
+      max-width="800px"
+      persistent
+    >
+      <v-card>
+        <v-card-title class="text-h5 bg-primary">
+          Neue Baustelle hinzufügen
+        </v-card-title>
 
+        <v-card-text class="pt-4">
+          <v-form ref="addForm">
+            <v-row>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="newItem.Baustellennummer"
+                  label="Baustellennummer"
+                  variant="outlined"
+                  density="compact"
+                  required
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="newItem.Jahr"
+                  label="Jahr"
+                  variant="outlined"
+                  density="compact"
+                  type="number"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="newItem.AG_Name"
+                  label="Auftraggeber"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="newItem.PLZ"
+                  label="PLZ"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="5"
+              >
+                <v-text-field
+                  v-model="newItem.Ort"
+                  label="Ort"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.Straße"
+                  label="Straße"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="newItem.Baubeginn"
+                  label="Baubeginn"
+                  variant="outlined"
+                  density="compact"
+                  type="date"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="newItem.Bauende"
+                  label="Bauende"
+                  variant="outlined"
+                  density="compact"
+                  type="date"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-checkbox
+                  v-model="newItem.Ost"
+                  color="orange"
+                  label="Ost"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-checkbox
+                  v-model="newItem.Beendet"
+                  label="Beendet"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-checkbox
+                  v-model="newItem.Abgerechnet"
+                  label="Abgerechnet"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="newItem.Stunden"
+                  label="Stunden"
+                  variant="outlined"
+                  density="compact"
+                  type="number"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-text-field
+                  v-model="newItem.letzteRechnung"
+                  label="Letzte Rechnung"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="newItem.Bemerkung"
+                  label="Bemerkung"
+                  variant="outlined"
+                  density="compact"
+                  rows="3"
+                />
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="closeAddDialog"
+          >
+            Abbrechen
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="elevated"
+            :loading="saving"
+            @click="saveNewItem"
+          >
+            Hinzufügen
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <!-- Edit Dialog -->
     <v-dialog
       v-model="editDialog"

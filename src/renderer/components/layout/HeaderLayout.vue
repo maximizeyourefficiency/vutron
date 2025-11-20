@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiFitToScreenOutline, mdiHome } from '@mdi/js'
+import { mdiFitToScreenOutline, mdiHome, mdiCog } from '@mdi/js'
 
 const router = useRouter()
 const route: any = useRoute()
@@ -36,12 +36,17 @@ const headerMenus: {
     icon: mdiFitToScreenOutline,
     text: 'title.baustellen',
     path: '/baustellen'
+  },
+  {
+    icon: mdiCog,
+    text: 'title.baustellen',
+    path: '/baustellen'
   }
 ]
 </script>
 <template>
   <v-app-bar
-    color="orange"
+    color="primary"
     density="compact"
   >
     <v-app-bar-title>{{ t(titleKey) }}</v-app-bar-title>

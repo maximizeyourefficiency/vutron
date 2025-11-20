@@ -50,6 +50,7 @@ export default pluginTypeScriptESLint.config(
     rules: {
       // override/add rules settings here, such as:
       eqeqeq: 'error',
+      'vue/singleline-html-element-content-newline': 'off',
       'no-unused-vars': 'off',
       'no-case-declarations': 'off',
       'no-trailing-spaces': 'error',

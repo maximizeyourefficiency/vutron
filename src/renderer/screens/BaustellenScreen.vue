@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-container fluid>
-      <h1 class="mb-4">Baustellenübersicht</h1>
+      <h1 class="mb-4"> Baustellenübersicht </h1>
 
       <!-- Statistik -->
       <v-row class="mb-4">
@@ -15,7 +15,7 @@
             @click="loadMoreBaustellen"
           >
             <v-card-text class="py-2 px-4">
-              <div class="text-caption">Geladen</div>
+              <div class="text-caption"> Geladen </div>
               <div class="text-subtitle-1 font-weight-medium">
                 {{ baustellen.length }} / {{ totalCount }}
               </div>
@@ -32,9 +32,9 @@
             @click="addBaustelle"
           >
             <v-card-text class="py-2 px-4">
-              <div class="text-caption">Geladen</div>
+              <div class="text-caption"> Hinzufügen </div>
               <div class="text-subtitle-1 font-weight-medium">
-                {{ baustellen.length }} / {{ totalCount }}
+                <v-icon>mdi-plus</v-icon>
               </div>
             </v-card-text>
           </v-card>
@@ -169,7 +169,7 @@
               size="small"
               @click="loadMoreBaustellen"
             >
-              <v-icon start>mdi-download</v-icon>
+              <v-icon start> mdi-download </v-icon>
               Mehr laden ({{ remainingCount }})
             </v-btn>
             <div

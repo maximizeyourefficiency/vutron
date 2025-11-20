@@ -42,6 +42,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/font": "^7.4.47",
     "electron-log": "^5.4.3",
     "pinia": "^3.0.3",

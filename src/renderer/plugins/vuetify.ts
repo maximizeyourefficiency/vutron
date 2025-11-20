@@ -27,16 +27,6 @@ export default createVuetify({
   components: {
     VIconBtn
   },
-  defaults: {
-    VBtn: {
-      style: [
-        {
-          // Do not force capitalization of a button text
-          textTransform: 'none'
-        }
-      ]
-    }
-  },
   icons: {
     defaultSet: 'mdi',
     aliases,

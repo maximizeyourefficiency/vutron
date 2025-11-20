@@ -29,12 +29,12 @@
           <v-card
             class="cursor-pointer"
             hover
-            @click="openEditDialog(item)"
+            @click="addBaustelle"
           >
             <v-card-text class="py-2 px-4">
               <div class="text-caption"> Hinzufügen </div>
               <div class="text-subtitle-1 font-weight-medium">
-                <v-icon>mdi-plus</v-icon>
+                <v-icon :icon="mdiPlus" />
               </div>
             </v-card-text>
           </v-card>
@@ -45,7 +45,7 @@
       <v-text-field
         v-model="search"
         label="Suche"
-        prepend-inner-icon="mdi-magnify"
+        :prepend-inner-icon="mdiMagnify"
         variant="outlined"
         hide-details
         single-line
@@ -65,8 +65,11 @@
         @update:page="page = $event"
       >
         <template #[`item.actions`]="{ item }">
-          <v-btn @click="openEditDialog(item)">
-            <v-icon>mdi-pencil</v-icon>
+          <v-btn
+            icon
+            @click="openEditDialog(item)"
+          >
+            <v-icon :icon="mdiPencil" />
           </v-btn>
         </template>
 
@@ -166,7 +169,10 @@
               size="small"
               @click="loadMoreBaustellen"
             >
-              <v-icon start> mdi-download </v-icon>
+              <v-icon
+                start
+                :icon="mdiDownload"
+              />
               Mehr laden ({{ remainingCount }})
             </v-btn>
             <div
@@ -177,6 +183,7 @@
         </template>
       </v-data-table>
     </v-container>
+
     <!-- Add Dialog -->
     <v-dialog
       v-model="addDialog"
@@ -391,6 +398,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
     <!-- Edit Dialog -->
     <v-dialog
       v-model="editDialog"
@@ -627,6 +635,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { mdiPencil, mdiPlus, mdiMagnify, mdiDownload } from '@mdi/js'
 
 const search = ref('')
 const baustellen = ref([])
@@ -636,6 +645,25 @@ const currentOffset = ref(0)
 const pageSize = 2000
 const itemsPerPage = ref(50)
 const page = ref(1)
+
+// Add Dialog
+const addDialog = ref(false)
+const newItem = ref({
+  Baustellennummer: '',
+  Jahr: new Date().getFullYear(),
+  AG_Name: '',
+  PLZ: '',
+  Ort: '',
+  Straße: '',
+  Ost: 0,
+  Baubeginn: '',
+  Bauende: '',
+  Beendet: 0,
+  Stunden: 0,
+  Abgerechnet: 0,
+  Bemerkung: '',
+  letzteRechnung: ''
+})
 
 // Edit Dialog
 const editDialog = ref(false)
@@ -691,6 +719,92 @@ const remainingCount = computed(() => {
   return Math.max(0, totalCount.value - currentOffset.value)
 })
 
+// Add Dialog Funktionen
+function addBaustelle() {
+  newItem.value = {
+    Baustellennummer: '',
+    Jahr: new Date().getFullYear(),
+    AG_Name: '',
+    PLZ: '',
+    Ort: '',
+    Straße: '',
+    Ost: 0,
+    Baubeginn: '',
+    Bauende: '',
+    Beendet: 0,
+    Stunden: 0,
+    Abgerechnet: 0,
+    Bemerkung: '',
+    letzteRechnung: ''
+  }
+  addDialog.value = true
+}
+
+function closeAddDialog() {
+  addDialog.value = false
+  setTimeout(() => {
+    newItem.value = {
+      Baustellennummer: '',
+      Jahr: new Date().getFullYear(),
+      AG_Name: '',
+      PLZ: '',
+      Ort: '',
+      Straße: '',
+      Ost: 0,
+      Baubeginn: '',
+      Bauende: '',
+      Beendet: 0,
+      Stunden: 0,
+      Abgerechnet: 0,
+      Bemerkung: '',
+      letzteRechnung: ''
+    }
+  }, 300)
+}
+
+async function saveNewItem() {
+  saving.value = true
+
+  try {
+    // Hier würde normalerweise ein API-Aufruf zum Hinzufügen erfolgen
+    await window.api.equery(
+      `INSERT INTO tblbaustellen 
+       (Baustellennummer, Jahr, PLZ, Ort, Straße, Ost, Baubeginn, Bauende, 
+        Beendet, Stunden, Abgerechnet, Bemerkung, letzteRechnung, AG_ID_F)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+        (SELECT AG_ID FROM tblAG WHERE AG_Name = ? LIMIT 1))`,
+      [
+        newItem.value.Baustellennummer,
+        newItem.value.Jahr,
+        newItem.value.PLZ,
+        newItem.value.Ort,
+        newItem.value.Straße,
+        newItem.value.Ost,
+        newItem.value.Baubeginn,
+        newItem.value.Bauende,
+        newItem.value.Beendet,
+        newItem.value.Stunden,
+        newItem.value.Abgerechnet,
+        newItem.value.Bemerkung,
+        newItem.value.letzteRechnung,
+        newItem.value.AG_Name
+      ]
+    )
+
+    // Liste neu laden, um die neue Baustelle anzuzeigen
+    currentOffset.value = 0
+    await loadBaustellen()
+
+    showSnackbar('Baustelle erfolgreich hinzugefügt', 'success')
+    closeAddDialog()
+  } catch (err) {
+    console.error('[Baustellen] Fehler beim Hinzufügen:', err)
+    showSnackbar('Fehler beim Hinzufügen der Baustelle', 'error')
+  } finally {
+    saving.value = false
+  }
+}
+
 // Edit Dialog Funktionen
 function openEditDialog(item) {
   editedIndex.value = baustellen.value.indexOf(item)
@@ -710,8 +824,6 @@ async function saveItem() {
   saving.value = true
 
   try {
-    // Hier würde normalerweise ein API-Aufruf zum Speichern erfolgen
-    // Beispiel:
     await window.api.equery(
       `UPDATE tblbaustellen SET
          Jahr = ?, PLZ = ?, Ort = ?, Straße = ?,
@@ -721,7 +833,7 @@ async function saveItem() {
       [
         editedItem.value.Jahr,
         editedItem.value.PLZ,
-        editedItem.value.Jahr,
+        editedItem.value.Ort,
         editedItem.value.Straße,
         editedItem.value.Ost,
         editedItem.value.Baubeginn,
@@ -840,6 +952,7 @@ async function loadMoreBaustellen() {
   try {
     const result = await window.api.fetchall(
       `SELECT 
+        tblbaustellen.Baustellen_ID,
         tblbaustellen.Baustellennummer,
         tblbaustellen.Jahr,
         tblAG.AG_Name,

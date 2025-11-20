@@ -10,10 +10,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/jooy2/vutron.git"
-  },
-  "bugs": {
-    "url": "https://github.com/jooy2/vutron/issues"
+    "url": "https://github.com/maximizeyourefficiency/vutron.git"
   },
   "debug": {
     "env": {

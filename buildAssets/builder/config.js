@@ -46,10 +46,6 @@ const baseConfig = {
     icon: 'buildAssets/icons/icon.ico',
     target: [
       {
-        target: 'appx',
-        arch: 'x64'
-      },
-      {
         target: 'zip',
         arch: 'x64'
       },

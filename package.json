@@ -33,7 +33,8 @@
     "format": "prettier .",
     "format:fix": "prettier . --write",
     "test": "npm run build:pre && playwright test",
-    "test:linux": "npm run build:pre && xvfb-run --auto-servernum --server-args='-screen 0, 1280x960x24' -- playwright test"
+    "test:linux": "npm run build:pre && xvfb-run --auto-servernum --server-args='-screen 0, 1280x960x24' -- playwright test",
+    "postinstall": "electron-builder install-app-deps"
   },
   "engines": {
     "node": ">=20.0.0"

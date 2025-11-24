@@ -33,6 +33,13 @@ export default createRouter({
       }
     },
     {
+      path: '/einstellungen',
+      component: () => import('@/renderer/screens/EinstellungenScreen.vue'),
+      meta: {
+        titleKey: 'title.einstellungen'
+      }
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/'
     }

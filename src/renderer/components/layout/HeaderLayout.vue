@@ -33,14 +33,14 @@ const headerMenus: {
     path: '/personal'
   },
   {
-    icon: mdiFitToScreenOutline,
+    icon: mdiHome,
     text: 'title.baustellen',
     path: '/baustellen'
   },
   {
     icon: mdiCog,
-    text: 'title.baustellen',
-    path: '/baustellen'
+    text: 'title.einstellungen',
+    path: '/einstellungen'
   }
 ]
 </script>

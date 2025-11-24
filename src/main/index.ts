@@ -80,8 +80,6 @@ app.on('window-all-closed', () => {
   }
 })
 
-
-
 app.on(
   'render-process-gone',
   (

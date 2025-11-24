@@ -636,6 +636,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { mdiPencil, mdiPlus, mdiMagnify, mdiDownload } from '@mdi/js'
+import { openFile } from '@/renderer/utils'
 
 const search = ref('')
 const baustellen = ref([])
@@ -645,6 +646,17 @@ const currentOffset = ref(0)
 const pageSize = 2000
 const itemsPerPage = ref(50)
 const page = ref(1)
+
+const selectedFile = ref('')
+
+const handleOpenFile = async () => {
+  const dialogResult = await openFile('.db')
+  if (!dialogResult.canceled) {
+    selectedFile.value = dialogResult.filePaths[0]
+    console.log(selectedFile.value)
+    window.api.path(selectedFile.value)
+  }
+}
 
 // Add Dialog
 const addDialog = ref(false)
@@ -875,10 +887,17 @@ async function getTotalCount() {
        WHERE Baustellen_ID NOT BETWEEN 3734 AND 3738 
          AND Baustellen_ID <> 4361`
     )
-
     if (result && result[0]) {
       totalCount.value = result[0].total
       console.debug('[Baustellen] Total count:', totalCount.value)
+    }
+    // Prüfe ob totalCount.value undefined ist (egal wo im Code)
+    if (totalCount.value === undefined) {
+      console.warn(
+        '[Baustellen] Total count ist undefined, führe handleOpenFile() aus'
+      )
+      await handleOpenFile()
+      window.location.reload()
     }
   } catch (err) {
     console.error('[Baustellen] Fehler beim Zählen:', err)

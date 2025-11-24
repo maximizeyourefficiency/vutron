@@ -57,12 +57,12 @@ app.on('ready', async () => {
   initializeMainLogger()
 
   mainWindow = await createMainWindow()
-  try {
+  /*try {
     return await setdbPath('database/mysqlite3.db', true, true)
   } catch (error) {
     console.log(error)
     return error
-  }
+  }*/
 })
 
 app.on('activate', async () => {

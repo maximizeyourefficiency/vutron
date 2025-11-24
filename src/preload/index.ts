@@ -70,9 +70,13 @@ contextBridge.exposeInMainWorld('mainApi', {
 })
 
 contextBridge.exposeInMainWorld('api', {
+  getSharedVariable: () => ipcRenderer.invoke('get-shared-variable'),
+  setSharedVariable: (value) => ipcRenderer.send('set-shared-variable', value),
   path: async () => {
+    const pfad = await ipcRenderer.invoke('get-shared-variable')
+    console.log('Wert im Preload:', pfad)
     try {
-      const res = await ipcRenderer.invoke('connect')
+      const res = await ipcRenderer.invoke('connect', 'database/mysqlite3.db')
       console.log('Output: ' + res)
     } catch (error) {
       console.log('Output: ' + error)

@@ -51,7 +51,7 @@ export default class IPCs {
     )
     ipcMain.handle('connect', async (event, dbPath, isuri, autocommit) => {
       try {
-        return await setdbPath('database/mysqlite3.db', true, true)
+        return await setdbPath(dbPath, true, true)
       } catch (error) {
         console.log(error)
         return error
@@ -157,6 +157,15 @@ export default class IPCs {
       } catch (error) {
         return error
       }
+    })
+    let sharedVariable = ''
+
+    ipcMain.handle('get-shared-variable', () => {
+      return sharedVariable
+    })
+
+    ipcMain.on('set-shared-variable', (event, value) => {
+      sharedVariable = value
     })
   }
 }

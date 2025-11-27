@@ -4,65 +4,150 @@ import { createErrorWindow, createMainWindow } from './MainRunner'
 import log from 'electron-log/main'
 import { join } from 'path'
 import path from 'node:path'
-const {
-  setdbPath,
-  executeQuery,
-  executeMany,
-  executeScript,
-  fetchOne,
-  fetchMany,
-  fetchAll,
-  fetchAllValue,
-  load_extension,
-  backup,
-  iterdump
-} = require('sqlite-electron')
+import Database from 'better-sqlite3'
+
 let mainWindow
 let errorWindow
+let db: Database.Database | null = null
 
-//const pfad = path.join(process.env.APP_ROOT, 'database/mysqlite3.db')
+const initializeDatabase = () => {
+  const dbPath = 'database/mysqlite3.db'
+  /*
+  //path.join(app.getPath('userData'), 'database', 'mysqlite3.db')
+  
+  // Stelle sicher, dass das database-Verzeichnis existiert
+  const dbDir = path.dirname(dbPath)
+  const fs = require('fs')
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true })
+  }*/
+
+  try {
+    db = new Database(dbPath, { verbose: log.debug })
+    log.info(`Database initialized at: ${dbPath}`)
+    
+    // Beispiel: Erstelle eine Tabelle (falls benötigt)
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      )
+    `)
+    
+    return db
+  } catch (error) {
+    log.error('Failed to initialize database:', error)
+    throw error
+  }
+}
+
+const closeDatabase = () => {
+  if (db) {
+    try {
+      db.close()
+      log.info('Database closed successfully')
+    } catch (error) {
+      log.error('Error closing database:', error)
+    }
+    db = null
+  }
+}
 
 const initializeMainLogger = () => {
   log.initialize({
     includeFutureSessions: false,
     preload: true
   })
-
+  
   const appLogFilePath = join(app.getPath('userData'), 'logs', 'applog.log')
-
   process.env.APP_ROOT = path.join(__dirname, '../..')
-
+  
   log.transports.file.resolvePathFn = () =>
     join(app.getPath('userData'), 'logs', 'applog.log')
   log.transports.file.level = 'silly'
   log.transports.file.format = '[{y}{m}{d} {h}:{i}:{s}.{ms}|{level}]{text}'
   log.transports.console.format = '{h}:{i}:{s}.{ms} {text}'
   log.transports.console.level = 'silly'
-
   log.silly(`Start logging... (Path: ${appLogFilePath}) App is ready.`)
 }
+
+// IPC-Handler für Datenbankzugriff
+ipcMain.handle('db:query', async (_event, sql: string, params: any[] = []) => {
+  if (!db) {
+    throw new Error('Database not initialized')
+  }
+  try {
+    const stmt = db.prepare(sql)
+    return stmt.all(...params)
+  } catch (error) {
+    log.error('Database query error:', error)
+    throw error
+  }
+})
+
+ipcMain.handle('db:execute', async (_event, sql: string, params: any[] = []) => {
+  if (!db) {
+    throw new Error('Database not initialized')
+  }
+  try {
+    const stmt = db.prepare(sql)
+    return stmt.run(...params)
+  } catch (error) {
+    log.error('Database execute error:', error)
+    throw error
+  }
+})
+
+ipcMain.handle('db:get', async (_event, sql: string, params: any[] = []) => {
+  if (!db) {
+    throw new Error('Database not initialized')
+  }
+  try {
+    const stmt = db.prepare(sql)
+    return stmt.get(...params)
+  } catch (error) {
+    log.error('Database get error:', error)
+    throw error
+  }
+})
+
+ipcMain.handle('db:transaction', async (_event, updates: Array<{sql: string, params: any[]}>) => {
+  if (!db) {
+    throw new Error('Database not initialized')
+  }
+  
+  const transaction = db.transaction((updates) => {
+    for (const update of updates) {
+      const stmt = db.prepare(update.sql)
+      stmt.run(...update.params)
+    }
+  })
+  
+  try {
+    transaction(updates)
+    log.info(`Transaction completed with ${updates.length} queries`)
+    return { success: true, count: updates.length }
+  } catch (error) {
+    log.error('Transaction failed:', error)
+    throw error
+  }
+})
 
 app.on('ready', async () => {
   if (Constants.IS_DEV_ENV) {
     import('./index.dev')
   }
-
-  // Disable special menus on macOS by uncommenting the following, if necessary
-  /*
-  if (Constants.IS_MAC) {
-    systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
-    systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
-  }
-  */
+  
   initializeMainLogger()
-
-  mainWindow = await createMainWindow()
-  /*try {
-    return await setdbPath('database/mysqlite3.db', true, true)
+  
+  try {
+    initializeDatabase()
+    log.info('Database ready')
   } catch (error) {
-    console.log(error)
-    return error
-  }*/
+    log.error('Database initialization failed:', error)
+  }
+  
+  mainWindow = await createMainWindow()
 })
 
 app.on('activate', async () => {
@@ -72,12 +157,16 @@ app.on('activate', async () => {
 })
 
 app.on('window-all-closed', () => {
+  closeDatabase()
   mainWindow = null
   errorWindow = null
-
   if (!Constants.IS_MAC) {
     app.quit()
   }
+})
+
+app.on('before-quit', () => {
+  closeDatabase()
 })
 
 app.on(
@@ -91,6 +180,10 @@ app.on(
   }
 )
 
-process.on('uncaughtException', () => {
+process.on('uncaughtException', (error) => {
+  log.error('Uncaught exception:', error)
   errorWindow = createErrorWindow(errorWindow, mainWindow)
 })
+
+// Export db für andere Module (optional)
+export const getDatabase = () => db

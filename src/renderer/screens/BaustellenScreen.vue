@@ -834,14 +834,44 @@ function closeEditDialog() {
 
 async function saveItem() {
   saving.value = true
-
+  console.log('window.electron:', window.api.electron)
+  console.log('Available methods:', Object.keys(window.electron || {}))
   try {
+    // Transaction (Bulk Updates)
+    const updates = [
+      {
+        sql: `UPDATE tblbaustellen SET
+         Jahr = ?, PLZ = ?, Ort = ?, Straße = ?,
+         Ost = ?, Baubeginn = ?, Bauende = ?, Beendet = ?,
+         Stunden = ?, Abgerechnet = ?, Bemerkung = ?, letzteRechnung = ?
+       WHERE Baustellen_ID = ?`,
+        params: [
+          editedItem.value.Jahr,
+          editedItem.value.PLZ,
+          editedItem.value.Ort,
+          editedItem.value.Straße,
+          editedItem.value.Ost,
+          editedItem.value.Baubeginn,
+          editedItem.value.Bauende,
+          editedItem.value.Beendet,
+          editedItem.value.Stunden,
+          editedItem.value.Abgerechnet,
+          editedItem.value.Bemerkung,
+          editedItem.value.letzteRechnung,
+          editedItem.value.Baustellen_ID
+        ]
+      }
+    ]
+    console.log('updates:', updates)
+    const txResult = await window.electron.etransaction(updates)
+    console.log('Updated:', txResult.count)
+    /*
     await window.api.equery(
       `UPDATE tblbaustellen SET
          Jahr = ?, PLZ = ?, Ort = ?, Straße = ?,
          Ost = ?, Baubeginn = ?, Bauende = ?, Beendet = ?,
          Stunden = ?, Abgerechnet = ?, Bemerkung = ?, letzteRechnung = ?
-       WHERE Baustellen_ID = ${editedItem.value.Baustellen_ID}`,
+       WHERE Baustellen_ID = ?`,
       [
         editedItem.value.Jahr,
         editedItem.value.PLZ,
@@ -854,9 +884,10 @@ async function saveItem() {
         editedItem.value.Stunden,
         editedItem.value.Abgerechnet,
         editedItem.value.Bemerkung,
-        editedItem.value.letzteRechnung
+        editedItem.value.letzteRechnung,
+        editedItem.value.Baustellen_ID
       ]
-    )
+    )*/
 
     // Aktualisiere das Item in der lokalen Liste
     if (editedIndex.value > -1) {
@@ -881,7 +912,7 @@ function showSnackbar(text, color = 'success') {
 
 async function getTotalCount() {
   try {
-    const result = await window.api.fetchall(
+    const result = await window.electron.test(
       `SELECT COUNT(*) as total 
        FROM tblbaustellen
        WHERE Baustellen_ID NOT BETWEEN 3734 AND 3738 
@@ -917,7 +948,7 @@ async function loadBaustellen() {
   try {
     await getTotalCount()
 
-    const result = await window.api.fetchall(
+    const result = await window.electron.test(
       `SELECT
         tblbaustellen.Baustellen_ID,
         tblbaustellen.Baustellennummer,
@@ -969,7 +1000,7 @@ async function loadMoreBaustellen() {
   console.debug('[Baustellen] Loading more, offset:', currentOffset.value)
 
   try {
-    const result = await window.api.fetchall(
+    const result = await window.electron.test(
       `SELECT 
         tblbaustellen.Baustellen_ID,
         tblbaustellen.Baustellennummer,

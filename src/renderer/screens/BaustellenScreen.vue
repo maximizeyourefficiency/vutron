@@ -863,7 +863,7 @@ async function saveItem() {
       }
     ]
     console.log('updates:', updates)
-    const txResult = await window.electron.etransaction(updates)
+    const txResult = await window.electron.transaction(updates)
     console.log('Updated:', txResult.count)
     /*
     await window.api.equery(

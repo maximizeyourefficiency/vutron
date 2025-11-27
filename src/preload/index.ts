@@ -116,22 +116,22 @@ contextBridge.exposeInMainWorld('electron', {
       throw error
     }
   },
-  equery: async (query: string, params?: any[]) => {
+  query: async (query: string, params?: any[]) => {
     console.log('preload query:', query, params)
     return await ipcRenderer.invoke('db:query', query, params || [])
   },
   
-  eexecute: async (query: string, params?: any[]) => {
+  execute: async (query: string, params?: any[]) => {
     console.log('preload execute:', query, params)
     return await ipcRenderer.invoke('db:execute', query, params || [])
   },
   
-  eget: async (query: string, params?: any[]) => {
+  get: async (query: string, params?: any[]) => {
     console.log('preload get:', query, params)
     return await ipcRenderer.invoke('db:get', query, params || [])
   },
   
-  etransaction: async (updates: Array<{sql: string, params: any[]}>) => {
+  transaction: async (updates: Array<{sql: string, params: any[]}>) => {
     console.log('preload transaction:', updates)
     return await ipcRenderer.invoke('db:transaction', updates)
   }

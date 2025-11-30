@@ -70,7 +70,6 @@ contextBridge.exposeInMainWorld('mainApi', {
 })
 
 contextBridge.exposeInMainWorld('api', {
-
   equery: async (query, params) => {
     try {
       console.log('preload query:', query)
@@ -96,7 +95,7 @@ contextBridge.exposeInMainWorld('api', {
   }
 })
 contextBridge.exposeInMainWorld('electron', {
-  test: async (query) => {
+  getAll: async (query) => {
     try {
       //console.log('preload query:', query)
       let sql
@@ -116,22 +115,26 @@ contextBridge.exposeInMainWorld('electron', {
       throw error
     }
   },
+  connect: async (query: string) => {
+    console.log('preload query:', query)
+    return await ipcRenderer.invoke('db:connect', query || [])
+  },
   query: async (query: string, params?: any[]) => {
     console.log('preload query:', query, params)
     return await ipcRenderer.invoke('db:query', query, params || [])
   },
-  
+
   execute: async (query: string, params?: any[]) => {
     console.log('preload execute:', query, params)
     return await ipcRenderer.invoke('db:execute', query, params || [])
   },
-  
+
   get: async (query: string, params?: any[]) => {
     console.log('preload get:', query, params)
     return await ipcRenderer.invoke('db:get', query, params || [])
   },
-  
-  transaction: async (updates: Array<{sql: string, params: any[]}>) => {
+
+  transaction: async (updates: Array<{ sql: string; params: any[] }>) => {
     console.log('preload transaction:', updates)
     return await ipcRenderer.invoke('db:transaction', updates)
   }

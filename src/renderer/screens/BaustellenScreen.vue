@@ -654,7 +654,7 @@ const handleOpenFile = async () => {
   if (!dialogResult.canceled) {
     selectedFile.value = dialogResult.filePaths[0]
     console.log(selectedFile.value)
-    window.api.path(selectedFile.value)
+    window.electron.connect(selectedFile.value)
   }
 }
 
@@ -912,7 +912,7 @@ function showSnackbar(text, color = 'success') {
 
 async function getTotalCount() {
   try {
-    const result = await window.electron.test(
+    const result = await window.electron.getAll(
       `SELECT COUNT(*) as total 
        FROM tblbaustellen
        WHERE Baustellen_ID NOT BETWEEN 3734 AND 3738 
@@ -932,6 +932,8 @@ async function getTotalCount() {
     }
   } catch (err) {
     console.error('[Baustellen] Fehler beim Zählen:', err)
+    await handleOpenFile()
+    window.location.reload()
   }
 }
 
@@ -948,7 +950,7 @@ async function loadBaustellen() {
   try {
     await getTotalCount()
 
-    const result = await window.electron.test(
+    const result = await window.electron.getAll(
       `SELECT
         tblbaustellen.Baustellen_ID,
         tblbaustellen.Baustellennummer,
@@ -1000,7 +1002,7 @@ async function loadMoreBaustellen() {
   console.debug('[Baustellen] Loading more, offset:', currentOffset.value)
 
   try {
-    const result = await window.electron.test(
+    const result = await window.electron.getAll(
       `SELECT 
         tblbaustellen.Baustellen_ID,
         tblbaustellen.Baustellennummer,

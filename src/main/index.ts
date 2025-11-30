@@ -25,15 +25,6 @@ const initializeDatabase = () => {
   try {
     db = new Database(dbPath, { verbose: log.debug })
     log.info(`Database initialized at: ${dbPath}`)
-    
-    // Beispiel: Erstelle eine Tabelle (falls benötigt)
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS settings (
-        key TEXT PRIMARY KEY,
-        value TEXT
-      )
-    `)
-    
     return db
   } catch (error) {
     log.error('Failed to initialize database:', error)
@@ -58,10 +49,10 @@ const initializeMainLogger = () => {
     includeFutureSessions: false,
     preload: true
   })
-  
+
   const appLogFilePath = join(app.getPath('userData'), 'logs', 'applog.log')
   process.env.APP_ROOT = path.join(__dirname, '../..')
-  
+
   log.transports.file.resolvePathFn = () =>
     join(app.getPath('userData'), 'logs', 'applog.log')
   log.transports.file.level = 'silly'
@@ -70,6 +61,19 @@ const initializeMainLogger = () => {
   log.transports.console.level = 'silly'
   log.silly(`Start logging... (Path: ${appLogFilePath}) App is ready.`)
 }
+
+// IPC-Handler für Datenbankzugriff
+ipcMain.handle('db:connect', async (_event, pfad: string) => {
+  const dbPath = pfad
+  try {
+    db = new Database(dbPath, { verbose: log.debug })
+    log.info(`Database initialized at: ${dbPath}`)
+    return db
+  } catch (error) {
+    log.error('Failed to initialize database:', error)
+    throw error
+  }
+})
 
 // IPC-Handler für Datenbankzugriff
 ipcMain.handle('db:query', async (_event, sql: string, params: any[] = []) => {
@@ -85,18 +89,21 @@ ipcMain.handle('db:query', async (_event, sql: string, params: any[] = []) => {
   }
 })
 
-ipcMain.handle('db:execute', async (_event, sql: string, params: any[] = []) => {
-  if (!db) {
-    throw new Error('Database not initialized')
+ipcMain.handle(
+  'db:execute',
+  async (_event, sql: string, params: any[] = []) => {
+    if (!db) {
+      throw new Error('Database not initialized')
+    }
+    try {
+      const stmt = db.prepare(sql)
+      return stmt.run(...params)
+    } catch (error) {
+      log.error('Database execute error:', error)
+      throw error
+    }
   }
-  try {
-    const stmt = db.prepare(sql)
-    return stmt.run(...params)
-  } catch (error) {
-    log.error('Database execute error:', error)
-    throw error
-  }
-})
+)
 
 ipcMain.handle('db:get', async (_event, sql: string, params: any[] = []) => {
   if (!db) {
@@ -111,42 +118,45 @@ ipcMain.handle('db:get', async (_event, sql: string, params: any[] = []) => {
   }
 })
 
-ipcMain.handle('db:transaction', async (_event, updates: Array<{sql: string, params: any[]}>) => {
-  if (!db) {
-    throw new Error('Database not initialized')
-  }
-  
-  const transaction = db.transaction((updates) => {
-    for (const update of updates) {
-      const stmt = db.prepare(update.sql)
-      stmt.run(...update.params)
+ipcMain.handle(
+  'db:transaction',
+  async (_event, updates: Array<{ sql: string; params: any[] }>) => {
+    if (!db) {
+      throw new Error('Database not initialized')
     }
-  })
-  
-  try {
-    transaction(updates)
-    log.info(`Transaction completed with ${updates.length} queries`)
-    return { success: true, count: updates.length }
-  } catch (error) {
-    log.error('Transaction failed:', error)
-    throw error
+
+    const transaction = db.transaction((updates) => {
+      for (const update of updates) {
+        const stmt = db.prepare(update.sql)
+        stmt.run(...update.params)
+      }
+    })
+
+    try {
+      transaction(updates)
+      log.info(`Transaction completed with ${updates.length} queries`)
+      return { success: true, count: updates.length }
+    } catch (error) {
+      log.error('Transaction failed:', error)
+      throw error
+    }
   }
-})
+)
 
 app.on('ready', async () => {
   if (Constants.IS_DEV_ENV) {
     import('./index.dev')
   }
-  
+
   initializeMainLogger()
-  
+
   try {
     initializeDatabase()
     log.info('Database ready')
   } catch (error) {
     log.error('Database initialization failed:', error)
   }
-  
+
   mainWindow = await createMainWindow()
 })
 

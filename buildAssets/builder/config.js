@@ -5,7 +5,7 @@ const packageJson = require('../../package.json')
 const baseConfig = {
   productName: packageJson.name,
   appId: packageJson.appId,
-  asar: true,
+  asar: false,
   extends: null,
   compression: 'maximum',
   artifactName: '${productName} ${version}_${arch}.${ext}',

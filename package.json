@@ -1,10 +1,10 @@
 {
-  "name": "vutron",
+  "name": "my-vutron",
   "appId": "com.vutron.vutron",
   "version": "1.0.0",
   "description": "Quick Start Templates for Vite + Vue 3 + Electron",
   "homepage": "https://vutron.cdget.com",
-  "author": "CDGet <jooy2.contact@gmail.com>",
+  "author": "Piet <p.tennler@gmail.com>",
   "license": "MIT",
   "main": "dist/main/index.js",
   "private": true,
@@ -32,6 +32,7 @@
     "lint:fix": "eslint . --ext .js,.ts,.vue --fix .",
     "format": "prettier .",
     "format:fix": "prettier . --write",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
     "test": "npm run build:pre && playwright test",
     "test:linux": "npm run build:pre && xvfb-run --auto-servernum --server-args='-screen 0, 1280x960x24' -- playwright test",
     "postinstall": "electron-builder install-app-deps"
@@ -42,7 +43,7 @@
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/font": "^7.4.47",
-    "better-sqlite3": "^12.4.6",
+    "better-sqlite3": "12.5.0",
     "electron-log": "^5.4.3",
     "node-abi": "^4.24.0",
     "pinia": "^3.0.3",
@@ -73,7 +74,6 @@
     "jiti": "^2.6.1",
     "playwright": "^1.56.1",
     "prettier": "^3.6.2",
-    "sqlite-electron": "^3.3.5",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.1",
     "vite": "^7.1.10",

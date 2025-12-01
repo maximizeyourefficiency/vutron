@@ -4,7 +4,13 @@ import { createErrorWindow, createMainWindow } from './MainRunner'
 import log from 'electron-log/main'
 import { join } from 'path'
 import path from 'node:path'
-import Database from 'better-sqlite3'
+
+// Import the 'createRequire' function from the 'module' package
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+
+// Import better-sqlite3
+const Database = require('better-sqlite3')
 
 let mainWindow
 let errorWindow
@@ -12,15 +18,6 @@ let db: Database.Database | null = null
 
 const initializeDatabase = () => {
   const dbPath = 'database/mysqlite3.db'
-  /*
-  //path.join(app.getPath('userData'), 'database', 'mysqlite3.db')
-  
-  // Stelle sicher, dass das database-Verzeichnis existiert
-  const dbDir = path.dirname(dbPath)
-  const fs = require('fs')
-  if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true })
-  }*/
 
   try {
     db = new Database(dbPath, { verbose: log.debug })

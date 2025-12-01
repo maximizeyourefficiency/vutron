@@ -5,7 +5,7 @@ const packageJson = require('../../package.json')
 const baseConfig = {
   productName: packageJson.name,
   appId: packageJson.appId,
-  asar: false,
+  asar: true,
   extends: null,
   compression: 'maximum',
   artifactName: '${productName} ${version}_${arch}.${ext}',
@@ -46,15 +46,7 @@ const baseConfig = {
     icon: 'buildAssets/icons/icon.ico',
     target: [
       {
-        target: 'zip',
-        arch: 'x64'
-      },
-      {
         target: 'portable',
-        arch: 'x64'
-      },
-      {
-        target: 'nsis',
         arch: 'x64'
       }
     ]

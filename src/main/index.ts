@@ -4,40 +4,34 @@ import { createErrorWindow, createMainWindow } from './MainRunner'
 import log from 'electron-log/main'
 import { join } from 'path'
 import path from 'node:path'
-
-// Import the 'createRequire' function from the 'module' package
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-
-// Import better-sqlite3
-const Database = require('better-sqlite3')
+import { DatabaseSync } from 'node:sqlite'
 
 let mainWindow
 let errorWindow
-let db: Database.Database | null = null
+let db: DatabaseSync | null = null
 
-const initializeDatabase = () => {
-  const dbPath = 'database/mysqlite3.db'
-
+// SQLite-Datenbank öffnen
+function openDatabase() {
   try {
-    db = new Database(dbPath, { verbose: log.debug })
-    log.info(`Database initialized at: ${dbPath}`)
-    return db
+    // Pfad zur Datenbank im userData-Verzeichnis
+    //const dbPath = path.join(app.getPath('userData'), 'database.db')
+    const dbPath = 'database/mysqlite3.db'
+    console.log('Öffne Datenbank:', dbPath)
+
+    // Datenbank öffnen (wird erstellt, falls nicht vorhanden)
+    db = new DatabaseSync(dbPath)
+
+    console.log('Datenbank erfolgreich geöffnet')
   } catch (error) {
-    log.error('Failed to initialize database:', error)
-    throw error
+    console.error('Fehler beim Öffnen der Datenbank:', error)
   }
 }
 
-const closeDatabase = () => {
+// Datenbank schließen
+function closeDatabase() {
   if (db) {
-    try {
-      db.close()
-      log.info('Database closed successfully')
-    } catch (error) {
-      log.error('Error closing database:', error)
-    }
-    db = null
+    db.close()
+    console.log('Datenbank geschlossen')
   }
 }
 
@@ -61,19 +55,33 @@ const initializeMainLogger = () => {
 
 // IPC-Handler für Datenbankzugriff
 ipcMain.handle('db:connect', async (_event, pfad: string) => {
-  const dbPath = pfad
   try {
-    db = new Database(dbPath, { verbose: log.debug })
-    log.info(`Database initialized at: ${dbPath}`)
-    return db
+    const dbPath = pfad
+    console.log('Öffne Datenbank:', dbPath)
+    // Datenbank öffnen (wird erstellt, falls nicht vorhanden)
+    db = new DatabaseSync(dbPath)
+    console.log('Datenbank erfolgreich geöffnet')
   } catch (error) {
-    log.error('Failed to initialize database:', error)
+    console.error('Fehler beim Öffnen der Datenbank:', error)
+  }
+})
+
+// IPC-Handler für Datenbankzugriff
+ipcMain.handle('db:getAll', async (_event, sql: string) => {
+  if (!db) {
+    throw new Error('Database not initialized')
+  }
+  try {
+    const query = db.prepare(sql)
+    return query.all()
+  } catch (error) {
+    log.error('Database query error:', error)
     throw error
   }
 })
 
 // IPC-Handler für Datenbankzugriff
-ipcMain.handle('db:query', async (_event, sql: string, params: any[] = []) => {
+ipcMain.handle('db:get', async (_event, sql: string, params: any[] = []) => {
   if (!db) {
     throw new Error('Database not initialized')
   }
@@ -93,6 +101,7 @@ ipcMain.handle(
       throw new Error('Database not initialized')
     }
     try {
+      log.error('Database execute error:', sql)
       const stmt = db.prepare(sql)
       return stmt.run(...params)
     } catch (error) {
@@ -102,39 +111,38 @@ ipcMain.handle(
   }
 )
 
-ipcMain.handle('db:get', async (_event, sql: string, params: any[] = []) => {
-  if (!db) {
-    throw new Error('Database not initialized')
-  }
-  try {
-    const stmt = db.prepare(sql)
-    return stmt.get(...params)
-  } catch (error) {
-    log.error('Database get error:', error)
-    throw error
-  }
-})
-
+// Handler für Transaktionen (mehrere Updates sicher ausführen)
 ipcMain.handle(
   'db:transaction',
-  async (_event, updates: Array<{ sql: string; params: any[] }>) => {
+  async (_event, queries: Array<{ sql: string; params: any[] }>) => {
     if (!db) {
       throw new Error('Database not initialized')
     }
 
-    const transaction = db.transaction((updates) => {
-      for (const update of updates) {
-        const stmt = db.prepare(update.sql)
-        stmt.run(...update.params)
-      }
-    })
-
     try {
-      transaction(updates)
-      log.info(`Transaction completed with ${updates.length} queries`)
-      return { success: true, count: updates.length }
+      // Transaction starten
+      db.exec('BEGIN TRANSACTION')
+
+      const results = []
+
+      // Alle Queries ausführen
+      for (const query of queries) {
+        const stmt = db.prepare(query.sql)
+        const result = stmt.run(...query.params)
+        results.push({
+          changes: result.changes,
+          lastInsertRowid: result.lastInsertRowid
+        })
+      }
+
+      // Transaction bestätigen
+      db.exec('COMMIT')
+
+      return { success: true, results }
     } catch (error) {
-      log.error('Transaction failed:', error)
+      // Bei Fehler: Rollback
+      db.exec('ROLLBACK')
+      console.error('Transaction error:', error)
       throw error
     }
   }
@@ -148,7 +156,7 @@ app.on('ready', async () => {
   initializeMainLogger()
 
   try {
-    initializeDatabase()
+    openDatabase()
     log.info('Database ready')
   } catch (error) {
     log.error('Database initialization failed:', error)
@@ -192,5 +200,5 @@ process.on('uncaughtException', (error) => {
   errorWindow = createErrorWindow(errorWindow, mainWindow)
 })
 
-// Export db für andere Module (optional)
-export const getDatabase = () => db
+// Exportiere db für IPC-Handler (optional)
+export { db }

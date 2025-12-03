@@ -32,7 +32,6 @@
     "lint:fix": "eslint . --ext .js,.ts,.vue --fix .",
     "format": "prettier .",
     "format:fix": "prettier . --write",
-    "rebuild": "electron-rebuild -f -w better-sqlite3",
     "test": "npm run build:pre && playwright test",
     "test:linux": "npm run build:pre && xvfb-run --auto-servernum --server-args='-screen 0, 1280x960x24' -- playwright test",
     "postinstall": "electron-builder install-app-deps"
@@ -43,7 +42,6 @@
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/font": "^7.4.47",
-    "better-sqlite3": "12.5.0",
     "electron-log": "^5.4.3",
     "node-abi": "^4.24.0",
     "pinia": "^3.0.3",
@@ -56,7 +54,6 @@
     "@eslint/js": "^9.37.0",
     "@mdi/js": "^7.4.47",
     "@playwright/test": "^1.56.1",
-    "@types/better-sqlite3": "^7.6.13",
     "@typescript-eslint/parser": "^8.46.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vitejs/plugin-vue-jsx": "^5.1.1",

@@ -10,27 +10,6 @@ import pinia from '@/renderer/plugins/pinia'
 declare global {
   interface Window {
     mainApi?: any
-    /*api: {
-      connect: (
-        path: string,
-        isuri: boolean,
-        autocommit: boolean
-      ) => Promise<any>
-      executeQuery: (query: string, values: any[]) => Promise<any>
-      fetchone: (query: string, values: any[]) => Promise<any>
-      fetchmany: (query: string, size: number, values: any[]) => Promise<any>
-      fetchall: (query: string, values: any[]) => Promise<any>
-      executeMany: (query: string, values: any[][]) => Promise<any>
-      executeScript: (scriptPath: string) => Promise<any>
-      load_extension: (path: string) => Promise<any>
-      backup: (
-        target: string,
-        pages: number,
-        name: string,
-        sleep: number
-      ) => Promise<any>
-      iterdump: (path: string, filter: string) => Promise<any>
-    }*/
   }
 }
 

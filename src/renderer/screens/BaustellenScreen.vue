@@ -152,7 +152,6 @@
               }}
               von {{ totalCount }} geladen)
             </div>
-
             <v-pagination
               v-model="page"
               :length="pageCount"
@@ -198,36 +197,12 @@
         <v-card-text class="pt-4">
           <v-form ref="addForm">
             <v-row>
-              <v-col
-                cols="12"
-                md="6"
-              >
-                <v-text-field
-                  v-model="newItem.Baustellennummer"
-                  label="Baustellennummer"
-                  variant="outlined"
-                  density="compact"
-                  required
-                />
-              </v-col>
-              <v-col
-                cols="12"
-                md="6"
-              >
-                <v-text-field
-                  v-model="newItem.Jahr"
-                  label="Jahr"
-                  variant="outlined"
-                  density="compact"
-                  type="number"
-                />
-              </v-col>
-            </v-row>
-
-            <v-row>
               <v-col cols="12">
-                <v-text-field
-                  v-model="newItem.AG_Name"
+                <v-combobox
+                  v-model="newItem.AG_ID_F"
+                  :items="agList"
+                  item-title="AG_Name"
+                  item-value="AG_ID"
                   label="Auftraggeber"
                   variant="outlined"
                   density="compact"
@@ -284,18 +259,6 @@
                   type="date"
                 />
               </v-col>
-              <v-col
-                cols="12"
-                md="6"
-              >
-                <v-text-field
-                  v-model="newItem.Bauende"
-                  label="Bauende"
-                  variant="outlined"
-                  density="compact"
-                  type="date"
-                />
-              </v-col>
             </v-row>
 
             <v-row>
@@ -307,30 +270,6 @@
                   v-model="newItem.Ost"
                   color="orange"
                   label="Ost"
-                  :true-value="-1"
-                  :false-value="0"
-                  hide-details
-                />
-              </v-col>
-              <v-col
-                cols="12"
-                md="4"
-              >
-                <v-checkbox
-                  v-model="newItem.Beendet"
-                  label="Beendet"
-                  :true-value="-1"
-                  :false-value="0"
-                  hide-details
-                />
-              </v-col>
-              <v-col
-                cols="12"
-                md="4"
-              >
-                <v-checkbox
-                  v-model="newItem.Abgerechnet"
-                  label="Abgerechnet"
                   :true-value="-1"
                   :false-value="0"
                   hide-details
@@ -349,17 +288,6 @@
                   variant="outlined"
                   density="compact"
                   type="number"
-                />
-              </v-col>
-              <v-col
-                cols="12"
-                md="6"
-              >
-                <v-text-field
-                  v-model="newItem.letzteRechnung"
-                  label="Letzte Rechnung"
-                  variant="outlined"
-                  density="compact"
                 />
               </v-col>
             </v-row>
@@ -441,8 +369,11 @@
 
             <v-row>
               <v-col cols="12">
-                <v-text-field
-                  v-model="editedItem.AG_Name"
+                <v-combobox
+                  v-model="editedItem.AG_ID_F"
+                  :items="agList"
+                  item-title="AG_Name"
+                  item-value="AG_ID"
                   label="Auftraggeber"
                   variant="outlined"
                   density="compact"
@@ -646,6 +577,7 @@ const currentOffset = ref(0)
 const pageSize = 2000
 const itemsPerPage = ref(50)
 const page = ref(1)
+const agList = ref([])
 
 const selectedFile = ref('')
 
@@ -661,9 +593,7 @@ const handleOpenFile = async () => {
 // Add Dialog
 const addDialog = ref(false)
 const newItem = ref({
-  Baustellennummer: '',
-  Jahr: new Date().getFullYear(),
-  AG_Name: '',
+  AG_ID_F: '',
   PLZ: '',
   Ort: '',
   Straße: '',
@@ -673,8 +603,7 @@ const newItem = ref({
   Beendet: 0,
   Stunden: 0,
   Abgerechnet: 0,
-  Bemerkung: '',
-  letzteRechnung: ''
+  Bemerkung: ''
 })
 
 // Edit Dialog
@@ -734,9 +663,7 @@ const remainingCount = computed(() => {
 // Add Dialog Funktionen
 function addBaustelle() {
   newItem.value = {
-    Baustellennummer: '',
-    Jahr: new Date().getFullYear(),
-    AG_Name: '',
+    AG_ID_F: '',
     PLZ: '',
     Ort: '',
     Straße: '',
@@ -746,8 +673,7 @@ function addBaustelle() {
     Beendet: 0,
     Stunden: 0,
     Abgerechnet: 0,
-    Bemerkung: '',
-    letzteRechnung: ''
+    Bemerkung: ''
   }
   addDialog.value = true
 }
@@ -756,9 +682,7 @@ function closeAddDialog() {
   addDialog.value = false
   setTimeout(() => {
     newItem.value = {
-      Baustellennummer: '',
-      Jahr: new Date().getFullYear(),
-      AG_Name: '',
+      AG_ID_F: '',
       PLZ: '',
       Ort: '',
       Straße: '',
@@ -768,41 +692,61 @@ function closeAddDialog() {
       Beendet: 0,
       Stunden: 0,
       Abgerechnet: 0,
-      Bemerkung: '',
-      letzteRechnung: ''
+      Bemerkung: ''
     }
   }, 300)
 }
 
+async function loadAGData() {
+  try {
+    const result = await window.electron.getAll(
+      `SELECT AG_ID, AG_Name FROM tblAG`
+    )
+    if (Array.isArray(result)) {
+      agList.value = await result
+      //agList.value = result
+      //currentOffset.value = result.length
+      console.debug('[AGList] Initial geladen:', agList.value)
+    } else {
+      console.warn('[AGList] Kein Array:', result)
+      agList.value = []
+    }
+  } catch (err) {
+    console.error('[AGList] Fehler beim Laden:', err)
+    agList.value = []
+  }
+}
+
 async function saveNewItem() {
   saving.value = true
-
+  console.log('Available methods:', Object.keys(window.electron || {}))
   try {
-    // Hier würde normalerweise ein API-Aufruf zum Hinzufügen erfolgen
-    await window.api.equery(
-      `INSERT INTO tblbaustellen 
-       (Baustellennummer, Jahr, PLZ, Ort, Straße, Ost, Baubeginn, Bauende, 
-        Beendet, Stunden, Abgerechnet, Bemerkung, letzteRechnung, AG_ID_F)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-        (SELECT AG_ID FROM tblAG WHERE AG_Name = ? LIMIT 1))`,
-      [
-        newItem.value.Baustellennummer,
-        newItem.value.Jahr,
-        newItem.value.PLZ,
-        newItem.value.Ort,
-        newItem.value.Straße,
-        newItem.value.Ost,
-        newItem.value.Baubeginn,
-        newItem.value.Bauende,
-        newItem.value.Beendet,
-        newItem.value.Stunden,
-        newItem.value.Abgerechnet,
-        newItem.value.Bemerkung,
-        newItem.value.letzteRechnung,
-        newItem.value.AG_Name
-      ]
-    )
-
+    // Extrahiere AG_ID aus dem Objekt falls es ein Objekt ist
+    const agId =
+      typeof newItem.value.AG_ID_F === 'object'
+        ? newItem.value.AG_ID_F.AG_ID
+        : newItem.value.AG_ID_F
+    const insert = [
+      {
+        sql: `INSERT INTO tblbaustellen (PLZ, Ort, Straße, Ost, Baubeginn, Bauende, Beendet, Stunden, Abgerechnet, Bemerkung, AG_ID_F) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        params: [
+          newItem.value.PLZ,
+          newItem.value.Ort,
+          newItem.value.Straße,
+          newItem.value.Ost,
+          newItem.value.Baubeginn,
+          newItem.value.Bauende,
+          newItem.value.Beendet,
+          newItem.value.Stunden,
+          newItem.value.Abgerechnet,
+          newItem.value.Bemerkung,
+          agId
+        ]
+      }
+    ]
+    console.log('insert:', insert)
+    const txResult = await window.electron.transaction(insert)
+    console.log('inserted:', txResult.count)
     // Liste neu laden, um die neue Baustelle anzuzeigen
     currentOffset.value = 0
     await loadBaustellen()
@@ -834,17 +778,17 @@ function closeEditDialog() {
 
 async function saveItem() {
   saving.value = true
-  console.log('window.electron:', window.api.electron)
   console.log('Available methods:', Object.keys(window.electron || {}))
   try {
-    // Transaction (Bulk Updates)
+    // Extrahiere AG_ID aus dem Objekt falls es ein Objekt ist
+    const agId =
+      typeof editedItem.value.AG_ID_F === 'object'
+        ? editedItem.value.AG_ID_F.AG_ID
+        : editedItem.value.AG_ID_F
+
     const updates = [
       {
-        sql: `UPDATE tblbaustellen SET
-         Jahr = ?, PLZ = ?, Ort = ?, Straße = ?,
-         Ost = ?, Baubeginn = ?, Bauende = ?, Beendet = ?,
-         Stunden = ?, Abgerechnet = ?, Bemerkung = ?, letzteRechnung = ?
-       WHERE Baustellen_ID = ?`,
+        sql: `UPDATE tblbaustellen SET Jahr = ?, PLZ = ?, Ort = ?, Straße = ?, Ost = ?, Baubeginn = ?, Bauende = ?, Beendet = ?, Stunden = ?, Abgerechnet = ?, Bemerkung = ?, letzteRechnung = ?, AG_ID_F = ? WHERE Baustellen_ID = ?`,
         params: [
           editedItem.value.Jahr,
           editedItem.value.PLZ,
@@ -858,6 +802,7 @@ async function saveItem() {
           editedItem.value.Abgerechnet,
           editedItem.value.Bemerkung,
           editedItem.value.letzteRechnung,
+          agId, // Verwende die extrahierte AG_ID
           editedItem.value.Baustellen_ID
         ]
       }
@@ -865,29 +810,6 @@ async function saveItem() {
     console.log('updates:', updates)
     const txResult = await window.electron.transaction(updates)
     console.log('Updated:', txResult.count)
-    /*
-    await window.api.equery(
-      `UPDATE tblbaustellen SET
-         Jahr = ?, PLZ = ?, Ort = ?, Straße = ?,
-         Ost = ?, Baubeginn = ?, Bauende = ?, Beendet = ?,
-         Stunden = ?, Abgerechnet = ?, Bemerkung = ?, letzteRechnung = ?
-       WHERE Baustellen_ID = ?`,
-      [
-        editedItem.value.Jahr,
-        editedItem.value.PLZ,
-        editedItem.value.Ort,
-        editedItem.value.Straße,
-        editedItem.value.Ost,
-        editedItem.value.Baubeginn,
-        editedItem.value.Bauende,
-        editedItem.value.Beendet,
-        editedItem.value.Stunden,
-        editedItem.value.Abgerechnet,
-        editedItem.value.Bemerkung,
-        editedItem.value.letzteRechnung,
-        editedItem.value.Baustellen_ID
-      ]
-    )*/
 
     // Aktualisiere das Item in der lokalen Liste
     if (editedIndex.value > -1) {
@@ -1048,6 +970,7 @@ async function loadMoreBaustellen() {
 onMounted(() => {
   console.debug('[Baustellen] Component mounted')
   loadBaustellen()
+  loadAGData()
 })
 
 onBeforeUnmount(() => {

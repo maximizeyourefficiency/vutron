@@ -95,6 +95,10 @@ contextBridge.exposeInMainWorld('api', {
   }
 })
 contextBridge.exposeInMainWorld('electron', {
+  connect: async (query: string) => {
+    console.log('preload query:', query)
+    return await ipcRenderer.invoke('db:connect', query || [])
+  },
   getAll: async (query) => {
     try {
       //console.log('preload query:', query)
@@ -106,8 +110,8 @@ contextBridge.exposeInMainWorld('electron', {
         // kein JSON -> sende den rohen String weiter (z.B. "SELECT ...")
         sql = query
       }
-      const res = await ipcRenderer.invoke('db:query', sql)
-      console.log('preload res:', JSON.stringify(res))
+      const res = await ipcRenderer.invoke('db:getAll', sql)
+      console.log('preload getAll res:', JSON.stringify(res))
       return res
     } catch (error) {
       console.error('preload query error:', error)
@@ -115,13 +119,9 @@ contextBridge.exposeInMainWorld('electron', {
       throw error
     }
   },
-  connect: async (query: string) => {
-    console.log('preload query:', query)
-    return await ipcRenderer.invoke('db:connect', query || [])
-  },
-  query: async (query: string, params?: any[]) => {
+  transaction: async (query: string, params?: any[]) => {
     console.log('preload query:', query, params)
-    return await ipcRenderer.invoke('db:query', query, params || [])
+    return await ipcRenderer.invoke('db:transaction', query, params || [])
   },
 
   execute: async (query: string, params?: any[]) => {

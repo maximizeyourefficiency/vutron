@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => {
           assetsDir: '.',
           outDir: 'dist/main',
           rollupOptions: {
-            external: ['electron', 'better-sqlite3', ...builtinModules]
+            external: ['electron', ...builtinModules]
           }
         }
       }

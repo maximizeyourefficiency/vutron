@@ -63,6 +63,8 @@
         class="elevation-1"
         :page="page"
         @update:page="page = $event"
+        fixed-header
+        height="600px"
       >
         <template #[`item.actions`]="{ item }">
           <v-btn
@@ -978,6 +980,16 @@ onBeforeUnmount(() => {
   loadLock = false
 })
 </script>
+
+<style>
+body {
+  overflow-y: hidden !important;
+}
+
+html {
+  overflow-y: hidden !important;
+}
+</style>
 
 <style scoped>
 h1 {

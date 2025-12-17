@@ -12,7 +12,7 @@
           <v-card
             class="cursor-pointer"
             hover
-            @click="addBaustelle"
+            @click="addPerson"
           >
             <v-card-text class="py-2 px-4">
               <div class="text-caption"> Hinzufügen </div>
@@ -44,8 +44,8 @@
         :items-per-page="itemsPerPage"
         fixed-header
         height="600px"
-        density="comfortable"
-        class="elevation-1"
+        density="compact"
+        style="white-space: nowrap"
         :page="page"
         @update:page="page = $event"
       >
@@ -57,67 +57,48 @@
             <v-icon :icon="mdiPencil" />
           </v-btn>
         </template>
-
-        <!-- Checkbox für OST -->
-        <template #[`item.Ost`]="{ item }">
-          <v-chip
-            v-if="item.Ost == -1"
+        <template #[`item.Aktiv`]="{ item }">
+          <v-icon
+            :icon="mdiCheckCircleOutline"
+            v-if="item.Aktiv == -1"
             color="success"
             size="small"
-            variant="flat"
-          >
-            ✓
-          </v-chip>
-          <v-chip
+          />
+          <v-icon
+            :icon="mdiRadioboxBlank"
             v-else
             color="grey"
             size="small"
-            variant="outlined"
-          >
-            −
-          </v-chip>
+          />
         </template>
-
-        <!-- Checkbox für Beendet -->
-        <template #[`item.Beendet`]="{ item }">
-          <v-chip
-            v-if="item.Beendet == -1"
+        <template #[`item.Lohnrelevant`]="{ item }">
+          <v-icon
+            :icon="mdiCheckCircleOutline"
+            v-if="item.Lohnrelevant == -1"
             color="success"
             size="small"
-            variant="flat"
-          >
-            ✓
-          </v-chip>
-          <v-chip
+          />
+          <v-icon
+            :icon="mdiRadioboxBlank"
             v-else
             color="grey"
             size="small"
-            variant="outlined"
-          >
-            −
-          </v-chip>
+          />
         </template>
-
-        <!-- Checkbox für Abgerechnet -->
-        <template #[`item.Abgerechnet`]="{ item }">
-          <v-chip
-            v-if="item.Abgerechnet == -1"
+        <template #[`item.verheiratet`]="{ item }">
+          <v-icon
+            :icon="mdiCheckCircleOutline"
+            v-if="item.verheiratet == -1"
             color="success"
             size="small"
-            variant="flat"
-          >
-            ✓
-          </v-chip>
-          <v-chip
+          />
+          <v-icon
+            :icon="mdiRadioboxBlank"
             v-else
             color="grey"
             size="small"
-            variant="outlined"
-          >
-            −
-          </v-chip>
+          />
         </template>
-
         <template #no-data>
           <v-alert
             type="info"
@@ -182,11 +163,11 @@
             <v-row>
               <v-col cols="12">
                 <v-combobox
-                  v-model="newItem.AG_ID_F"
+                  v-model="newItem.Bauleiter_ID_F"
                   :items="bauleiterList"
-                  item-title="AG_Name"
-                  item-value="AG_ID"
-                  label="Auftraggeber"
+                  item-title="Name"
+                  item-value="Bauleiter_ID"
+                  label="Bauleiter"
                   variant="outlined"
                   density="compact"
                 />
@@ -196,7 +177,77 @@
             <v-row>
               <v-col
                 cols="12"
-                md="3"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.Kuerzel"
+                  label="Kuerzel"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="4"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.ID_StH"
+                  label="Steinhof-ID"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="4"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.ID_Stb"
+                  label="Steuerbüronummer"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.Rufname"
+                  label="Rufname"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.Vorname"
+                  label="Vorname"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.Nachname"
+                  label="Nachname"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
               >
                 <v-text-field
                   v-model="newItem.PLZ"
@@ -207,7 +258,7 @@
               </v-col>
               <v-col
                 cols="12"
-                md="5"
+                md="4"
               >
                 <v-text-field
                   v-model="newItem.Ort"
@@ -228,61 +279,197 @@
                 />
               </v-col>
             </v-row>
-
             <v-row>
               <v-col
                 cols="12"
-                md="6"
+                md="3"
               >
                 <v-text-field
-                  v-model="newItem.Baubeginn"
-                  label="Baubeginn"
+                  v-model="newItem.KundenNrAA"
+                  label="KundenNrAA"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="newItem.SteuerID"
+                  label="SteuerID"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="newItem.AusweisNr"
+                  label="AusweisNr"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="newItem.VersicherungsNr"
+                  label="VersicherungsNr"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="12"
+              >
+                <v-text-field
+                  v-model="newItem.IBAN"
+                  label="IBAN"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.GebOrt"
+                  label="Geburtsort"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="newItem.Geburtstag"
+                  label="Geburtstag"
                   variant="outlined"
                   density="compact"
                   type="date"
                 />
               </v-col>
             </v-row>
-
             <v-row>
               <v-col
                 cols="12"
-                md="4"
+                md="3"
+              >
+                <v-text-field
+                  v-model="newItem.Handy"
+                  label="Handy"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="newItem.Stundenlohn_Ost"
+                  label="Stundenlohn Ost"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="newItem.Stundenlohn_West"
+                  label="Stundenlohn West"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="newItem.Faktor"
+                  label="Faktor"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="3"
               >
                 <v-checkbox
-                  v-model="newItem.Ost"
-                  color="orange"
-                  label="Ost"
+                  v-model="newItem.Aktiv"
+                  label="Aktiv"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-checkbox
+                  v-model="newItem.Ausloese_psch_setzen"
+                  label="Ausloese psch setzen"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-checkbox
+                  v-model="newItem.Lohnrelevant"
+                  label="Lohnrelevant"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-checkbox
+                  v-model="newItem.verheiratet"
+                  label="verheiratet"
                   :true-value="-1"
                   :false-value="0"
                   hide-details
                 />
               </v-col>
             </v-row>
-
             <v-row>
               <v-col
                 cols="12"
-                md="6"
+                md="12"
               >
                 <v-text-field
-                  v-model="newItem.Stunden"
-                  label="Stunden"
+                  v-model="newItem.Kinder"
+                  label="Kinder"
                   variant="outlined"
                   density="compact"
                   type="number"
-                />
-              </v-col>
-            </v-row>
-
-            <v-row>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="newItem.Bemerkung"
-                  label="Bemerkung"
-                  variant="outlined"
-                  density="compact"
-                  rows="3"
                 />
               </v-col>
             </v-row>
@@ -549,7 +736,14 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { mdiPencil, mdiPlus, mdiMagnify, mdiDownload } from '@mdi/js'
+import {
+  mdiPencil,
+  mdiPlus,
+  mdiMagnify,
+  mdiDownload,
+  mdiCheckCircleOutline,
+  mdiRadioboxBlank
+} from '@mdi/js'
 import { openFile } from '@/renderer/utils'
 
 const search = ref('')
@@ -576,17 +770,34 @@ const handleOpenFile = async () => {
 // Add Dialog
 const addDialog = ref(false)
 const newItem = ref({
-  AG_ID_F: '',
+  Kuerzel: '',
+  ID_StH: '',
+  ID_Stb: '',
+  Rufname: '',
+  Nachname: '',
+  Vorname: '',
+  Geburtstag: '',
+  GebOrt: '',
+  IBAN: '',
+  KundenNrAA: '',
+  SteuerID: '',
+  AusweisNr: '',
+  VersicherungsNr: '',
+  Straße: '',
   PLZ: '',
   Ort: '',
-  Straße: '',
-  Ost: 0,
-  Baubeginn: '',
-  Bauende: '',
-  Beendet: 0,
-  Stunden: 0,
-  Abgerechnet: 0,
-  Bemerkung: ''
+  Handy: '',
+  Stundenlohn_West: '',
+  Stundenlohn_Ost: '',
+  Aktiv: -1,
+  Faktor: '',
+  Bild: '',
+  Kommentar: '',
+  Ausloese_psch_setzen: 0,
+  Lohnrelevant: 0,
+  verheiratet: 0,
+  Kinder: 0,
+  Bauleiter_ID_F: 1
 })
 
 // Edit Dialog
@@ -625,14 +836,12 @@ const headers = [
   { title: 'Stundenlohn_Ost', key: 'Stundenlohn_Ost' },
   { title: 'Aktiv', key: 'Aktiv' },
   { title: 'Faktor', key: 'Faktor' },
-  { title: 'Bild', key: 'Bild' },
-  { title: 'Kommentar', key: 'Kommentar' },
   { title: 'Ausloese_psch_setzen', key: 'Ausloese_psch_setzen' },
   { title: 'Lohnrelevant', key: 'Lohnrelevant' },
-  { title: 'Ausloese_psch_setzen', key: 'Ausloese_psch_setzen' },
   { title: 'verheiratet', key: 'verheiratet' },
   { title: 'Kinder', key: 'Kinder' },
-  { title: 'Bauleiter_ID_F', key: 'Bauleiter_ID_F' }
+  { title: 'Bauleiter', key: 'Name', width: '400px' },
+  { title: 'Kommentar', key: 'Kommentar' }
 ]
 
 const filteredPersonal = computed(() => {
@@ -659,19 +868,36 @@ const remainingCount = computed(() => {
 })
 
 // Add Dialog Funktionen
-function addBaustelle() {
+function addPerson() {
   newItem.value = {
-    AG_ID_F: '',
+    Kuerzel: '',
+    ID_StH: '',
+    ID_Stb: '',
+    Rufname: '',
+    Nachname: '',
+    Vorname: '',
+    Geburtstag: '',
+    GebOrt: '',
+    IBAN: '',
+    KundenNrAA: '',
+    SteuerID: '',
+    AusweisNr: '',
+    VersicherungsNr: '',
+    Straße: '',
     PLZ: '',
     Ort: '',
-    Straße: '',
-    Ost: 0,
-    Baubeginn: '',
-    Bauende: '',
-    Beendet: 0,
-    Stunden: 0,
-    Abgerechnet: 0,
-    Bemerkung: ''
+    Handy: '',
+    Stundenlohn_West: '',
+    Stundenlohn_Ost: '',
+    Aktiv: -1,
+    Faktor: '',
+    Bild: '',
+    Kommentar: '',
+    Ausloese_psch_setzen: 0,
+    Lohnrelevant: 0,
+    verheiratet: 0,
+    Kinder: 0,
+    Bauleiter_ID_F: 1
   }
   addDialog.value = true
 }
@@ -680,17 +906,34 @@ function closeAddDialog() {
   addDialog.value = false
   setTimeout(() => {
     newItem.value = {
-      AG_ID_F: '',
+      Kuerzel: '',
+      ID_StH: '',
+      ID_Stb: '',
+      Rufname: '',
+      Nachname: '',
+      Vorname: '',
+      Geburtstag: '',
+      GebOrt: '',
+      IBAN: '',
+      KundenNrAA: '',
+      SteuerID: '',
+      AusweisNr: '',
+      VersicherungsNr: '',
+      Straße: '',
       PLZ: '',
       Ort: '',
-      Straße: '',
-      Ost: 0,
-      Baubeginn: '',
-      Bauende: '',
-      Beendet: 0,
-      Stunden: 0,
-      Abgerechnet: 0,
-      Bemerkung: ''
+      Handy: '',
+      Stundenlohn_West: '',
+      Stundenlohn_Ost: '',
+      Aktiv: -1,
+      Faktor: '',
+      Bild: '',
+      Kommentar: '',
+      Ausloese_psch_setzen: 0,
+      Lohnrelevant: 0,
+      verheiratet: 0,
+      Kinder: 0,
+      Bauleiter_ID_F: 1
     }
   }, 300)
 }
@@ -720,25 +963,63 @@ async function saveNewItem() {
   console.log('Available methods:', Object.keys(window.electron || {}))
   try {
     // Extrahiere AG_ID aus dem Objekt falls es ein Objekt ist
-    const agId =
-      typeof newItem.value.AG_ID_F === 'object'
-        ? newItem.value.AG_ID_F.AG_ID
-        : newItem.value.AG_ID_F
+    const bauleiterId =
+      typeof newItem.value.Bauleiter_ID_F === 'object'
+        ? newItem.value.Bauleiter_ID_F.Bauleiter_ID
+        : newItem.value.Bauleiter_ID_F
     const insert = [
       {
-        sql: `INSERT INTO tblbaustellen (PLZ, Ort, Straße, Ost, Baubeginn, Bauende, Beendet, Stunden, Abgerechnet, Bemerkung, AG_ID_F) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        sql: `INSERT INTO tblpersonal (Kuerzel, ID_StH, ID_Stb, Rufname,
+          Nachname, Vorname,
+          Geburtstag, GebOrt,
+          IBAN, KundenNrAA,
+          SteuerID, AusweisNr,
+          VersicherungsNr,
+          Straße,
+          PLZ,
+          Ort,
+          Handy,
+          Stundenlohn_West,
+          Stundenlohn_Ost,
+          Aktiv,
+          Faktor,
+          Bild,
+          Kommentar,
+          Ausloese_psch_setzen,
+          Lohnrelevant,
+          verheiratet,
+          Kinder,
+          Bauleiter_ID_F)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?)`,
         params: [
+          newItem.value.Kuerzel,
+          newItem.value.ID_StH,
+          newItem.value.ID_Stb,
+          newItem.value.Rufname,
+          newItem.value.Nachname,
+          newItem.value.Vorname,
+          newItem.value.Geburtstag,
+          newItem.value.GebOrt,
+          newItem.value.IBAN,
+          newItem.value.KundenNrAA,
+          newItem.value.SteuerID,
+          newItem.value.AusweisNr,
+          newItem.value.VersicherungsNr,
+          newItem.value.Straße,
           newItem.value.PLZ,
           newItem.value.Ort,
-          newItem.value.Straße,
-          newItem.value.Ost,
-          newItem.value.Baubeginn,
-          newItem.value.Bauende,
-          newItem.value.Beendet,
-          newItem.value.Stunden,
-          newItem.value.Abgerechnet,
-          newItem.value.Bemerkung,
-          agId
+          newItem.value.Handy,
+          newItem.value.Stundenlohn_West,
+          newItem.value.Stundenlohn_Ost,
+          newItem.value.Aktiv,
+          newItem.value.Faktor,
+          newItem.value.Bild,
+          newItem.value.Kommentar,
+          newItem.value.Ausloese_psch_setzen,
+          newItem.value.Lohnrelevant,
+          newItem.value.verheiratet,
+          newItem.value.Kinder,
+          bauleiterId
         ]
       }
     ]
@@ -749,11 +1030,11 @@ async function saveNewItem() {
     currentOffset.value = 0
     await loadPersonal()
 
-    showSnackbar('Baustelle erfolgreich hinzugefügt', 'success')
+    showSnackbar('Person erfolgreich hinzugefügt', 'success')
     closeAddDialog()
   } catch (err) {
-    console.error('[Baustellen] Fehler beim Hinzufügen:', err)
-    showSnackbar('Fehler beim Hinzufügen der Baustelle', 'error')
+    console.error('[Person] Fehler beim Hinzufügen:', err)
+    showSnackbar('Fehler beim Hinzufügen der Person', 'error')
   } finally {
     saving.value = false
   }
@@ -869,7 +1150,37 @@ async function loadPersonal() {
     await getTotalCount()
 
     const result = await window.electron.getAll(
-      `SELECT *
+      `SELECT 
+      tblPersonal.Person_ID,
+      tblPersonal.Kuerzel,
+      tblPersonal.ID_StH,
+      tblPersonal.ID_Stb,
+      tblPersonal.Rufname,
+      tblPersonal.Nachname,
+      tblPersonal.Vorname,
+      tblPersonal.Geburtstag,
+      tblPersonal.GebOrt,
+      tblPersonal.IBAN,
+      tblPersonal.KundenNrAA,
+      tblPersonal.SteuerID,
+      tblPersonal.AusweisNr,
+      tblPersonal.VersicherungsNr,
+      tblPersonal.Straße,
+      tblPersonal.PLZ,
+      tblPersonal.Ort,
+      tblPersonal.Handy,
+      tblPersonal.Stundenlohn_West,
+      tblPersonal.Stundenlohn_Ost,
+      tblPersonal.Aktiv,
+      tblPersonal.Faktor,
+      tblPersonal.Bild,
+      tblPersonal.Kommentar,
+      tblPersonal.Ausloese_psch_setzen,
+      tblPersonal.Lohnrelevant,
+      tblPersonal.verheiratet,
+      tblPersonal.Kinder,
+      tblPersonal.Bauleiter_ID_F,
+      tblBauleiter.Name
       FROM tblPersonal
       LEFT JOIN tblbauleiter ON tblPersonal.Bauleiter_ID_F = tblbauleiter.Bauleiter_ID
       ORDER BY tblPersonal.Person_ID DESC 
@@ -947,6 +1258,10 @@ body {
 
 html {
   overflow-y: hidden !important;
+}
+.no-wrap-table :deep(.v-data-table__td),
+.no-wrap-table :deep(.v-data-table__th) {
+  white-space: nowrap !important;
 }
 </style>
 

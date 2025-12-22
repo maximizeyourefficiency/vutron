@@ -17,7 +17,7 @@ const handleOpenFile = async () => {
   if (!dialogResult.canceled) {
     selectedFile.value = dialogResult.filePaths[0]
     console.log(selectedFile.value)
-    window.electron.connect(selectedFile.value)
+    window.mainApi.connect(selectedFile.value)
   }
 }
 

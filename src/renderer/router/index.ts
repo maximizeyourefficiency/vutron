@@ -33,6 +33,13 @@ export default createRouter({
       }
     },
     {
+      path: '/auswertung',
+      component: () => import('@/renderer/screens/AuswertungScreen.vue'),
+      meta: {
+        titleKey: 'title.auswertung'
+      }
+    },
+    {
       path: '/einstellungen',
       component: () => import('@/renderer/screens/EinstellungenScreen.vue'),
       meta: {

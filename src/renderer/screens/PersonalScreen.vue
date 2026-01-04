@@ -941,7 +941,7 @@ function closeAddDialog() {
 async function loadBauleiterData() {
   try {
     const result = await window.electron.getAll(
-      `SELECT Bauleiter_ID, NAme FROM tblbauleiter`
+      `SELECT Bauleiter_ID, Name FROM tblbauleiter`
     )
     if (Array.isArray(result)) {
       bauleiterList.value = await result

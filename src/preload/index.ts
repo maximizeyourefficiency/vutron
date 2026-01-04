@@ -132,10 +132,10 @@ contextBridge.exposeInMainWorld('electron', {
   get: async (query: string, params?: any[]) => {
     console.log('preload get:', query, params)
     return await ipcRenderer.invoke('db:get', query, params || [])
-  },
-
+  }
+  /*
   transaction: async (updates: Array<{ sql: string; params: any[] }>) => {
     console.log('preload transaction:', updates)
     return await ipcRenderer.invoke('db:transaction', updates)
-  }
+  }*/
 })

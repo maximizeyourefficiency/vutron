@@ -38,6 +38,11 @@ const headerMenus: {
     path: '/baustellen'
   },
   {
+    icon: mdiHome,
+    text: 'title.auswertung',
+    path: '/auswertung'
+  },
+  {
     icon: mdiCog,
     text: 'title.einstellungen',
     path: '/einstellungen'

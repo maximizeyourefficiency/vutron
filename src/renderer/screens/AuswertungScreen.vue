@@ -161,22 +161,21 @@ const sumColumns = [
 
 // Header-Definition komplett
 const headers = [
-  { title: 'Monat', key: 'Monat', sortable: true },
-  { title: 'Personal_ID_F', key: 'Personal_ID_F', sortable: true },
+  { title: 'Monat', key: 'Monat', sortable: false },
 
   // Automatisch alle gerundeten Spalten hinzufügen
   ...roundedColumns.map((key) => ({
     title: key.replace(/_/g, ' '),
     key,
     align: 'center',
-    sortable: true,
+    sortable: false,
     value: (item) => formatNumber2(item[key])
   }))
 ]
 const headersMonatsleistung = [
-  { title: 'B-Nr', key: 'Baustellennummer', sortable: true },
-  { title: 'Ort', key: 'Ort', sortable: true },
-  { title: 'AG_Name', key: 'AG_Name', sortable: true }
+  { title: 'B-Nr', key: 'Baustellennummer', sortable: false },
+  { title: 'Ort', key: 'Ort', sortable: false },
+  { title: 'AG_Name', key: 'AG_Name', sortable: false }
 ]
 
 /* ------------------------------------------
@@ -370,6 +369,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.v-data-table::v-deep th {
+  font-size: 12px !important;
+}
+.v-data-table::v-deep td {
+  font-size: 16px !important;
+}
+
 .summen-zeile {
   border-top: 2px solid #e0e0e0;
   background-color: #f5f5f5;

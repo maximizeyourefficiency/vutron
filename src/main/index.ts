@@ -7,7 +7,9 @@ import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import {
   BerichtRow,
+  LeistungSummaryRow,
   BERICHT_SQL,
+  LEISTUNG_SUMMARY_SQL,
   strukturiereDaten,
   erstellePdfBericht
 } from './pdfBerichtErwin'
@@ -195,8 +197,14 @@ ipcMain.handle(
       }
 
       log.info('Strukturiere Daten...')
-      // Daten strukturieren und PDF erstellen
+      // Daten strukturieren
       const tageMap = strukturiereDaten(filteredRows)
+
+      // Leistungs-Zusammenfassung abfragen
+      log.info('Führe Leistungs-Summary-Abfrage aus...')
+      const summaryStmt = db.prepare(LEISTUNG_SUMMARY_SQL)
+      const summaryRows = summaryStmt.all(personalId, monat, jahr) as LeistungSummaryRow[]
+      log.info(`Summary-Abfrage: ${summaryRows.length} Zeilen gefunden`)
 
       log.info('Erstelle PDF...')
       const result = await erstellePdfBericht(tageMap, {
@@ -204,7 +212,7 @@ ipcMain.handle(
         nachname,
         monat,
         jahr
-      })
+      }, summaryRows)
       log.info('PDF erstellt:', result)
       return result
     } catch (error) {

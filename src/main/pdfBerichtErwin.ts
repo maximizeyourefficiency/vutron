@@ -42,6 +42,24 @@ export interface BerichtParams {
   jahr: number
 }
 
+// Interface für aggregierte Leistungsdaten (Zusammenfassung)
+export interface LeistungSummaryRow {
+  Baustellen_ID: number
+  Baustellennummer: number
+  Ort: string
+  Straße: string
+  Datum: string
+  LeistungsText: string
+  Preis: number
+  Gesamtmenge: number
+  Einheit: string
+  Personal_ID_F: number
+  Rufname: string
+  Kommentar: string
+  Monat: number
+  Jahr: number
+}
+
 // Interface für eine Leistungsposition
 interface Leistung {
   kurztext: string
@@ -125,15 +143,53 @@ export function strukturiereDaten(rows: BerichtRow[]): Map<number, Tag> {
 }
 
 /**
+ * Aggregiert die Zusammenfassungsdaten nach Leistungstext
+ */
+export function aggregiereLeistungen(
+  rows: LeistungSummaryRow[]
+): Map<
+  string,
+  { menge: number; einheit: string; preis: number; geldwert: number }
+> {
+  const result = new Map<
+    string,
+    { menge: number; einheit: string; preis: number; geldwert: number }
+  >()
+
+  for (const row of rows) {
+    const key = row.LeistungsText
+    if (!result.has(key)) {
+      result.set(key, {
+        menge: 0,
+        einheit: row.Einheit,
+        preis: row.Preis,
+        geldwert: 0
+      })
+    }
+    const entry = result.get(key)!
+    entry.menge += row.Gesamtmenge || 0
+    entry.geldwert = entry.menge * entry.preis
+  }
+
+  return result
+}
+
+/**
  * Erstellt ein PDF aus den strukturierten Daten und öffnet es
  */
 export async function erstellePdfBericht(
   tageMap: Map<number, Tag>,
-  params: BerichtParams
+  params: BerichtParams,
+  summaryRows?: LeistungSummaryRow[]
 ): Promise<{ success: boolean; path: string }> {
   try {
     const { vorname, nachname, monat, jahr } = params
-    log.info('erstellePdfBericht gestartet:', { vorname, nachname, monat, jahr })
+    log.info('erstellePdfBericht gestartet:', {
+      vorname,
+      nachname,
+      monat,
+      jahr
+    })
 
     // PDF-Pfad im Temp-Ordner (mit Zeitstempel für eindeutige Dateinamen)
     const timestamp = Date.now()
@@ -145,114 +201,229 @@ export async function erstellePdfBericht(
 
     // PDF erstellen
     const pdfDoc = await PDFDocument.create()
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
 
-  // A4-Maße
-  const pageWidth = 595.28
-  const pageHeight = 841.89
-  const margin = 50
-  const lineHeight = 14
+    // A4-Maße
+    const pageWidth = 595.28
+    const pageHeight = 841.89
+    const margin = 50
+    const lineHeight = 14
 
-  let page = pdfDoc.addPage([pageWidth, pageHeight])
-  let y = pageHeight - margin
+    let page = pdfDoc.addPage([pageWidth, pageHeight])
+    let y = pageHeight - margin
 
-  // Hilfsfunktion: Text zeichnen
-  const drawText = (
-    text: string,
-    x: number,
-    size: number,
-    bold = false,
-    color = rgb(0, 0, 0)
-  ) => {
-    page.drawText(text, {
-      x,
-      y,
-      size,
-      font: bold ? fontBold : font,
-      color
-    })
-  }
-
-  // Hilfsfunktion: Neue Seite falls nötig
-  const checkNewPage = () => {
-    if (y < margin + 50) {
-      page = pdfDoc.addPage([pageWidth, pageHeight])
-      y = pageHeight - margin
+    // Hilfsfunktion: Text zeichnen
+    const drawText = (
+      text: string,
+      x: number,
+      size: number,
+      bold = false,
+      color = rgb(0, 0, 0)
+    ) => {
+      page.drawText(text, {
+        x,
+        y,
+        size,
+        font: bold ? fontBold : font,
+        color
+      })
     }
-  }
 
-  // Titel
-  const titleText = `Leistungsauswertung: ${vorname} ${nachname} - ${monat}/${jahr}`
-  const titleWidth = fontBold.widthOfTextAtSize(titleText, 12)
-  drawText(titleText, (pageWidth - titleWidth) / 2, 12, true)
-  y -= 40
+    // Hilfsfunktion: Neue Seite falls nötig
+    const checkNewPage = () => {
+      if (y < margin + 50) {
+        page = pdfDoc.addPage([pageWidth, pageHeight])
+        y = pageHeight - margin
+      }
+    }
 
-  // Durch die Tage iterieren
-  for (const [, tag] of tageMap) {
-    checkNewPage()
+    // Titel
+    const titleText = `Leistungsauswertung: ${vorname} ${nachname} - ${monat}/${jahr}`
+    const titleWidth = fontBold.widthOfTextAtSize(titleText, 12)
+    drawText(titleText, (pageWidth - titleWidth) / 2, 12, true)
+    y -= 25
 
-    // Ebene 1: Datum (blau, fett)
-    drawText(
-      `${tag.datumAnzeige} ${tag.wochentag}`,
-      margin,
-      12,
-      true,
-      rgb(0.17, 0.24, 0.31)
-    )
-    drawText(
-      `${tag.summe.toFixed(2)} EUR`,
-      450,
-      12,
-      true,
-      rgb(0.17, 0.24, 0.31)
-    )
-    y -= 8
+    // Textfeld rechts oben: Zusammenfassung der Leistungen
+    if (summaryRows && summaryRows.length > 0) {
+      const aggregiert = aggregiereLeistungen(summaryRows)
+      const boxX = pageWidth - margin - 200
+      const boxWidth = 200
+      const boxPadding = 8
+      let boxY = y
+      const boxLineHeight = 14
 
-    // Unterstrich
-    page.drawLine({
-      start: { x: margin, y },
-      end: { x: pageWidth - margin, y },
-      thickness: 0.5,
-      color: rgb(0.17, 0.24, 0.31)
-    })
-    y -= lineHeight + 5
+      // Berechne Gesamtsumme und Box-Höhe vorab
+      let gesamtGeldwert = 0
+      for (const [, data] of aggregiert) {
+        gesamtGeldwert += data.geldwert
+      }
+      const boxContentHeight = (aggregiert.size + 2) * boxLineHeight + 8
 
-    // Durch Baustellen iterieren
-    for (const [, bs] of tag.baustellen) {
+      // Rahmen um das Textfeld (zuerst zeichnen, damit Text darüber liegt)
+      page.drawRectangle({
+        x: boxX,
+        y: y - boxContentHeight,
+        width: boxWidth,
+        height: boxContentHeight + boxPadding,
+        borderColor: rgb(0.17, 0.24, 0.31),
+        borderWidth: 1,
+        color: rgb(0.97, 0.97, 0.97)
+      })
+
+      boxY -= boxLineHeight + 2
+
+      // Spaltenposition für Beträge (rechtsbündig)
+      const colBetrag = boxX + boxWidth - boxPadding
+
+      // Aggregierte Leistungen auflisten (tabellenartig)
+      for (const [leistungsText, data] of aggregiert) {
+        // Kurztext links
+        page.drawText(leistungsText, {
+          x: boxX + boxPadding,
+          y: boxY,
+          size: 9,
+          font,
+          color: rgb(0.2, 0.2, 0.2)
+        })
+        // Betrag rechts (rechtsbündig)
+        const betragText = `${data.geldwert.toFixed(2)} €`
+        const betragWidth = font.widthOfTextAtSize(betragText, 9)
+        page.drawText(betragText, {
+          x: colBetrag - betragWidth,
+          y: boxY,
+          size: 9,
+          font,
+          color: rgb(0.2, 0.2, 0.2)
+        })
+        boxY -= boxLineHeight
+      }
+
+      // Gesamtsumme
+      boxY -= 2
+      page.drawLine({
+        start: { x: boxX + boxPadding, y: boxY + 10 },
+        end: { x: boxX + boxWidth - boxPadding, y: boxY + 10 },
+        thickness: 0.5,
+        color: rgb(0.17, 0.24, 0.31)
+      })
+      // "Gesamt:" links
+      page.drawText('Gesamt:', {
+        x: boxX + boxPadding,
+        y: boxY,
+        size: 10,
+        font: fontBold,
+        color: rgb(0.17, 0.24, 0.31)
+      })
+      // Betrag rechts (rechtsbündig)
+      const gesamtText = `${gesamtGeldwert.toFixed(2)} €`
+      const gesamtWidth = fontBold.widthOfTextAtSize(gesamtText, 10)
+      page.drawText(gesamtText, {
+        x: colBetrag - gesamtWidth,
+        y: boxY,
+        size: 10,
+        font: fontBold,
+        color: rgb(0.17, 0.24, 0.31)
+      })
+
+      // Y-Position unter die Box setzen (mit Abstand)
+      y = boxY - boxPadding - 20
+    } else {
+      y -= 15
+    }
+
+    // Durch die Tage iterieren
+    for (const [, tag] of tageMap) {
       checkNewPage()
 
-      // Ebene 2: Baustelle (grau)
-      const baustelleColor = rgb(0.2, 0.29, 0.37)
+      // Ebene 1: Datum (blau, fett)
       drawText(
-        `${bs.baustellennummer} - ${bs.ort}, ${bs.strasse} ${bs.arbeitsbeginn} - ${bs.ende} ${bs.pause} h ${bs.kommentar}`,
+        `${tag.datumAnzeige} ${tag.wochentag}`,
         margin,
-        11,
-        false,
-        baustelleColor
+        12,
+        true,
+        rgb(0.17, 0.24, 0.31)
       )
-      y -= lineHeight
+      drawText(
+        `${tag.summe.toFixed(2)} EUR`,
+        450,
+        12,
+        true,
+        rgb(0.17, 0.24, 0.31)
+      )
+      y -= 8
 
-      // Ebene 3: Leistungen (mit festen Spalten-Positionen)
-      const colKurztext = margin + 20
-      const colMenge = 250
-      const colEinheit = 280
-      const colPreis = 370
-      const colGeldwert = 450
+      // Unterstrich
+      page.drawLine({
+        start: { x: margin, y },
+        end: { x: pageWidth - margin, y },
+        thickness: 0.5,
+        color: rgb(0.17, 0.24, 0.31)
+      })
+      y -= lineHeight + 5
 
-      for (const l of bs.leistungen) {
+      // Durch Baustellen iterieren
+      for (const [, bs] of tag.baustellen) {
         checkNewPage()
-        page.drawText(l.kurztext || '-', { x: colKurztext, y, size: 10, font })
-        page.drawText(l.menge?.toFixed(2) || '-', { x: colMenge, y, size: 10, font })
-        page.drawText(l.einheit || '-', { x: colEinheit, y, size: 10, font })
-        page.drawText(`${l.preis?.toFixed(2) || '-'} €`, { x: colPreis, y, size: 10, font })
-        page.drawText(`${l.geldwert?.toFixed(2) || '-'} €`, { x: colGeldwert, y, size: 10, font })
+
+        // Ebene 2: Baustelle (grau)
+        const baustelleColor = rgb(0.2, 0.29, 0.37)
+        // Erste Zeile: Baustelleninfos
+        drawText(
+          `${bs.baustellennummer} - ${bs.ort}, ${bs.strasse} ${bs.arbeitsbeginn} - ${bs.ende} ${bs.pause} h`,
+          margin,
+          11,
+          false,
+          baustelleColor
+        )
         y -= lineHeight
+
+        // Zweite Zeile: Kommentar (falls vorhanden)
+        if (bs.kommentar && bs.kommentar.trim() !== '') {
+          drawText(bs.kommentar, margin + 20, 10, false, baustelleColor)
+          y -= lineHeight
+        }
+
+        // Ebene 3: Leistungen (mit festen Spalten-Positionen)
+        const colKurztext = margin + 20
+        const colMenge = 250
+        const colEinheit = 280
+        const colPreis = 370
+        const colGeldwert = 450
+
+        for (const l of bs.leistungen) {
+          checkNewPage()
+          page.drawText(l.kurztext || '-', {
+            x: colKurztext,
+            y,
+            size: 10,
+            font
+          })
+          page.drawText(l.menge?.toFixed(2) || '-', {
+            x: colMenge,
+            y,
+            size: 10,
+            font
+          })
+          page.drawText(l.einheit || '-', { x: colEinheit, y, size: 10, font })
+          page.drawText(`${l.preis?.toFixed(2) || '-'} €`, {
+            x: colPreis,
+            y,
+            size: 10,
+            font
+          })
+          page.drawText(`${l.geldwert?.toFixed(2) || '-'} €`, {
+            x: colGeldwert,
+            y,
+            size: 10,
+            font
+          })
+          y -= lineHeight
+        }
+        y -= 10
       }
-      y -= 10
+      y -= 15
     }
-    y -= 15
-  }
 
     // PDF speichern
     log.info('Speichere PDF...')
@@ -310,4 +481,53 @@ export const BERICHT_SQL = `
   WHERE vb.Personal_ID_F = ?
   ORDER BY
     vb.datum_id
+`
+
+/**
+ * SQL-Query für Leistungs-Zusammenfassung (aggregiert nach LeistungsText)
+ * Parameter: Personal_ID_F, Monat, Jahr
+ */
+export const LEISTUNG_SUMMARY_SQL = `
+  SELECT
+    b.Baustellen_ID,
+    b.Baustellennummer,
+    b.Ort,
+    b.Straße,
+    bd.Datum,
+    lk.LeistungsText,
+    bp.Preis,
+    SUM(bl.Menge) AS Gesamtmenge,
+    lk.Einheit,
+    bd.Personal_ID_F,
+    p.Rufname,
+    bd.Kommentar,
+    CAST(strftime('%m', bd.Datum) AS INTEGER) AS Monat,
+    CAST(strftime('%Y', bd.Datum) AS INTEGER) AS Jahr
+  FROM
+    tblbaustellen b
+    INNER JOIN tblbaustellenpreise bp ON b.Baustellen_ID = bp.Baustellen_ID_F
+    INNER JOIN tblbaustellendaten bd ON b.Baustellen_ID = bd.Baustellen_ID_F
+    INNER JOIN tblbaustellenleistung bl ON bd.BaustellenDaten_ID = bl.BaustellenDaten_ID_F
+    INNER JOIN tblleistungskatalog lk ON lk.LeistungsKatalog_ID = bp.LeistungsKatalog_ID_F
+      AND lk.LeistungsKatalog_ID = bl.LeistungsKatalog_ID_F
+    INNER JOIN tblpersonal p ON p.Person_ID = bd.Personal_ID_F
+  WHERE
+    b.Baustellen_ID <> 3736
+    AND bd.Personal_ID_F = ?
+    AND CAST(strftime('%m', bd.Datum) AS INTEGER) = ?
+    AND CAST(strftime('%Y', bd.Datum) AS INTEGER) = ?
+  GROUP BY
+    b.Baustellen_ID,
+    b.Baustellennummer,
+    b.Ort,
+    b.Straße,
+    bd.Datum,
+    lk.LeistungsText,
+    bp.Preis,
+    lk.Einheit,
+    bd.Personal_ID_F,
+    p.Rufname,
+    bd.Kommentar,
+    CAST(strftime('%m', bd.Datum) AS INTEGER),
+    CAST(strftime('%Y', bd.Datum) AS INTEGER)
 `

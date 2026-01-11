@@ -503,46 +503,19 @@
     >
       <v-card>
         <v-card-title class="text-h5 bg-primary">
-          Baustelle bearbeiten
+          Personal bearbeiten
         </v-card-title>
 
         <v-card-text class="pt-4">
           <v-form ref="editForm">
             <v-row>
-              <v-col
-                cols="12"
-                md="6"
-              >
-                <v-text-field
-                  v-model="editedItem.Baustellennummer"
-                  label="Baustellennummer"
-                  variant="outlined"
-                  density="compact"
-                  readonly
-                />
-              </v-col>
-              <v-col
-                cols="12"
-                md="6"
-              >
-                <v-text-field
-                  v-model="editedItem.Jahr"
-                  label="Jahr"
-                  variant="outlined"
-                  density="compact"
-                  type="number"
-                />
-              </v-col>
-            </v-row>
-
-            <v-row>
               <v-col cols="12">
                 <v-combobox
-                  v-model="editedItem.AG_ID_F"
+                  v-model="editedItem.Bauleiter_ID_F"
                   :items="bauleiterList"
-                  item-title="AG_Name"
-                  item-value="AG_ID"
-                  label="Auftraggeber"
+                  item-title="Name"
+                  item-value="Bauleiter_ID"
+                  label="Bauleiter"
                   variant="outlined"
                   density="compact"
                 />
@@ -552,7 +525,77 @@
             <v-row>
               <v-col
                 cols="12"
-                md="3"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.Kuerzel"
+                  label="Kuerzel"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="4"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.ID_StH"
+                  label="Steinhof-ID"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="4"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.ID_Stb"
+                  label="Steuerbüronummer"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.Rufname"
+                  label="Rufname"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.Vorname"
+                  label="Vorname"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.Nachname"
+                  label="Nachname"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
               >
                 <v-text-field
                   v-model="editedItem.PLZ"
@@ -563,7 +606,7 @@
               </v-col>
               <v-col
                 cols="12"
-                md="5"
+                md="4"
               >
                 <v-text-field
                   v-model="editedItem.Ort"
@@ -584,43 +627,144 @@
                 />
               </v-col>
             </v-row>
-
             <v-row>
               <v-col
                 cols="12"
-                md="6"
+                md="3"
               >
                 <v-text-field
-                  v-model="editedItem.Baubeginn"
-                  label="Baubeginn"
+                  v-model="editedItem.KundenNrAA"
+                  label="KundenNrAA"
                   variant="outlined"
                   density="compact"
-                  type="date"
                 />
               </v-col>
               <v-col
                 cols="12"
-                md="6"
+                md="3"
               >
                 <v-text-field
-                  v-model="editedItem.Bauende"
-                  label="Bauende"
+                  v-model="editedItem.SteuerID"
+                  label="SteuerID"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="editedItem.AusweisNr"
+                  label="AusweisNr"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="editedItem.VersicherungsNr"
+                  label="VersicherungsNr"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="12"
+              >
+                <v-text-field
+                  v-model="editedItem.IBAN"
+                  label="IBAN"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.GebOrt"
+                  label="Geburtsort"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="4"
+              >
+                <v-text-field
+                  v-model="editedItem.Geburtstag"
+                  label="Geburtstag"
                   variant="outlined"
                   density="compact"
                   type="date"
                 />
               </v-col>
             </v-row>
-
             <v-row>
               <v-col
                 cols="12"
-                md="4"
+                md="3"
+              >
+                <v-text-field
+                  v-model="editedItem.Handy"
+                  label="Handy"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="editedItem.Stundenlohn_Ost"
+                  label="Stundenlohn Ost"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="editedItem.Stundenlohn_West"
+                  label="Stundenlohn West"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-text-field
+                  v-model="editedItem.Faktor"
+                  label="Faktor"
+                  variant="outlined"
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="3"
               >
                 <v-checkbox
-                  v-model="editedItem.Ost"
-                  color="orange"
-                  label="Ost"
+                  v-model="editedItem.Aktiv"
+                  label="Aktiv"
                   :true-value="-1"
                   :false-value="0"
                   hide-details
@@ -628,11 +772,11 @@
               </v-col>
               <v-col
                 cols="12"
-                md="4"
+                md="3"
               >
                 <v-checkbox
-                  v-model="editedItem.Beendet"
-                  label="Beendet"
+                  v-model="editedItem.Ausloese_psch_setzen"
+                  label="Ausloese psch setzen"
                   :true-value="-1"
                   :false-value="0"
                   hide-details
@@ -640,52 +784,40 @@
               </v-col>
               <v-col
                 cols="12"
-                md="4"
+                md="3"
               >
                 <v-checkbox
-                  v-model="editedItem.Abgerechnet"
-                  label="Abgerechnet"
+                  v-model="editedItem.Lohnrelevant"
+                  label="Lohnrelevant"
+                  :true-value="-1"
+                  :false-value="0"
+                  hide-details
+                />
+              </v-col>
+              <v-col
+                cols="12"
+                md="3"
+              >
+                <v-checkbox
+                  v-model="editedItem.verheiratet"
+                  label="verheiratet"
                   :true-value="-1"
                   :false-value="0"
                   hide-details
                 />
               </v-col>
             </v-row>
-
             <v-row>
               <v-col
                 cols="12"
-                md="6"
+                md="12"
               >
                 <v-text-field
-                  v-model="editedItem.Stunden"
-                  label="Stunden"
+                  v-model="editedItem.Kinder"
+                  label="Kinder"
                   variant="outlined"
                   density="compact"
                   type="number"
-                />
-              </v-col>
-              <v-col
-                cols="12"
-                md="6"
-              >
-                <v-text-field
-                  v-model="editedItem.letzteRechnung"
-                  label="Letzte Rechnung"
-                  variant="outlined"
-                  density="compact"
-                />
-              </v-col>
-            </v-row>
-
-            <v-row>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="editedItem.Bemerkung"
-                  label="Bemerkung"
-                  variant="outlined"
-                  density="compact"
-                  rows="3"
                 />
               </v-col>
             </v-row>
@@ -1042,6 +1174,13 @@ async function saveNewItem() {
 function openEditDialog(item) {
   editedIndex.value = personal.value.indexOf(item)
   editedItem.value = { ...item }
+  // Finde das passende Bauleiter-Objekt für die Combobox
+  const bauleiterObject = bauleiterList.value.find(
+    (bl) => bl.Bauleiter_ID === item.Bauleiter_ID_F
+  )
+  if (bauleiterObject) {
+    editedItem.value.Bauleiter_ID_F = bauleiterObject
+  }
   editDialog.value = true
 }
 
@@ -1057,30 +1196,70 @@ async function saveItem() {
   saving.value = true
   console.log('Available methods:', Object.keys(window.electron || {}))
   try {
-    // Extrahiere AG_ID aus dem Objekt falls es ein Objekt ist
-    const agId =
-      typeof editedItem.value.AG_ID_F === 'object'
-        ? editedItem.value.AG_ID_F.AG_ID
-        : editedItem.value.AG_ID_F
+    // Extrahiere Bauleiter_ID aus dem Objekt falls es ein Objekt ist
+    const bauleiterId =
+      typeof editedItem.value.Bauleiter_ID_F === 'object'
+        ? editedItem.value.Bauleiter_ID_F.Bauleiter_ID
+        : editedItem.value.Bauleiter_ID_F
 
     const updates = [
       {
-        sql: `UPDATE tblbaustellen SET Jahr = ?, PLZ = ?, Ort = ?, Straße = ?, Ost = ?, Baubeginn = ?, Bauende = ?, Beendet = ?, Stunden = ?, Abgerechnet = ?, Bemerkung = ?, letzteRechnung = ?, AG_ID_F = ? WHERE Baustellen_ID = ?`,
+        sql: `UPDATE tblpersonal SET
+          Kuerzel = ?,
+          ID_StH = ?,
+          ID_Stb = ?,
+          Rufname = ?,
+          Nachname = ?,
+          Vorname = ?,
+          Geburtstag = ?,
+          GebOrt = ?,
+          IBAN = ?,
+          KundenNrAA = ?,
+          SteuerID = ?,
+          AusweisNr = ?,
+          VersicherungsNr = ?,
+          Straße = ?,
+          PLZ = ?,
+          Ort = ?,
+          Handy = ?,
+          Stundenlohn_West = ?,
+          Stundenlohn_Ost = ?,
+          Aktiv = ?,
+          Faktor = ?,
+          Ausloese_psch_setzen = ?,
+          Lohnrelevant = ?,
+          verheiratet = ?,
+          Kinder = ?,
+          Bauleiter_ID_F = ?
+          WHERE Person_ID = ?`,
         params: [
-          editedItem.value.Jahr,
+          editedItem.value.Kuerzel,
+          editedItem.value.ID_StH,
+          editedItem.value.ID_Stb,
+          editedItem.value.Rufname,
+          editedItem.value.Nachname,
+          editedItem.value.Vorname,
+          editedItem.value.Geburtstag,
+          editedItem.value.GebOrt,
+          editedItem.value.IBAN,
+          editedItem.value.KundenNrAA,
+          editedItem.value.SteuerID,
+          editedItem.value.AusweisNr,
+          editedItem.value.VersicherungsNr,
+          editedItem.value.Straße,
           editedItem.value.PLZ,
           editedItem.value.Ort,
-          editedItem.value.Straße,
-          editedItem.value.Ost,
-          editedItem.value.Baubeginn,
-          editedItem.value.Bauende,
-          editedItem.value.Beendet,
-          editedItem.value.Stunden,
-          editedItem.value.Abgerechnet,
-          editedItem.value.Bemerkung,
-          editedItem.value.letzteRechnung,
-          agId, // Verwende die extrahierte AG_ID
-          editedItem.value.Baustellen_ID
+          editedItem.value.Handy,
+          editedItem.value.Stundenlohn_West,
+          editedItem.value.Stundenlohn_Ost,
+          editedItem.value.Aktiv,
+          editedItem.value.Faktor,
+          editedItem.value.Ausloese_psch_setzen,
+          editedItem.value.Lohnrelevant,
+          editedItem.value.verheiratet,
+          editedItem.value.Kinder,
+          bauleiterId,
+          editedItem.value.Person_ID
         ]
       }
     ]
@@ -1097,7 +1276,7 @@ async function saveItem() {
     closeEditDialog()
   } catch (err) {
     console.error('[Personal] Fehler beim Speichern:', err)
-    showSnackbar('Fehler beim Speichern der Baustelle', 'error')
+    showSnackbar('Fehler beim Speichern der Person', 'error')
   } finally {
     saving.value = false
   }

@@ -49,6 +49,7 @@
           hide-default-footer
           class="responsive-table"
           @click:row="onRowClick"
+          @dblclick:row="onRowDoubleClick"
         >
           <template #[`body.append`]>
             <tr class="summen-zeile">
@@ -187,8 +188,11 @@ const lohnDaten = ref([])
 const selectedRows = ref([])
 const baustellenDaten = ref([])
 const selectedPerson = ref(null)
+const selectedVorname = ref('')
+const selectedNachname = ref('')
 const selectedJahr = ref(null)
 const selectedRowId = ref(null)
+const generatingPdf = ref(false)
 
 const activeItem = ref(0)
 const loading = ref(false)
@@ -204,11 +208,45 @@ function getRowProps(item) {
 }
 
 /* ------------------------------------------
-   Row Selection Handler
+   Row Selection Handler (Single Click)
 ------------------------------------------ */
 function onRowClick(event, { item }) {
   selectedRowId.value = item.Lohn_ID
   loadBaustellenImMonat(item.Jahr, item.Monat, item.Personal_ID_F)
+}
+
+/* ------------------------------------------
+   Row Double-Click Handler (Generate PDF Report)
+------------------------------------------ */
+async function onRowDoubleClick(event, { item }) {
+  if (generatingPdf.value) return
+
+  generatingPdf.value = true
+  try {
+    console.log('Generiere PDF-Bericht für:', {
+      personalId: item.Personal_ID_F,
+      jahr: item.Jahr,
+      monat: item.Monat,
+      vorname: selectedVorname.value,
+      nachname: selectedNachname.value
+    })
+
+    const result = await window.electron.generateBericht({
+      personalId: item.Personal_ID_F,
+      jahr: item.Jahr,
+      monat: item.Monat,
+      vorname: selectedVorname.value,
+      nachname: selectedNachname.value
+    })
+
+    if (!result.success) {
+      console.warn('Bericht konnte nicht erstellt werden:', result.error)
+    }
+  } catch (error) {
+    console.error('Fehler beim Erstellen des Berichts:', error)
+  } finally {
+    generatingPdf.value = false
+  }
 }
 
 /* ------------------------------------------
@@ -231,7 +269,7 @@ function calculateSum(columnKey) {
 async function loadPersonal() {
   try {
     const result = await window.electron.getAll(
-      `SELECT Person_ID, Rufname FROM tblPersonal WHERE Aktiv <> 0 AND Lohnrelevant <> 0`
+      `SELECT Person_ID, Rufname, Vorname, Nachname FROM tblPersonal WHERE Aktiv <> 0 AND Lohnrelevant <> 0`
     )
 
     if (Array.isArray(result)) {
@@ -240,6 +278,8 @@ async function loadPersonal() {
       // Erstes Personal automatisch auswählen
       if (personalList.value.length > 0) {
         selectedPerson.value = personalList.value[0].Person_ID
+        selectedVorname.value = personalList.value[0].Vorname || ''
+        selectedNachname.value = personalList.value[0].Nachname || ''
         tryLoadLohn()
       }
     }
@@ -318,6 +358,9 @@ function selectYear(jahr) {
 ------------------------------------------ */
 function onPersonSelected(personId) {
   selectedPerson.value = personId
+  const person = personalList.value.find((p) => p.Person_ID === personId)
+  selectedVorname.value = person?.Vorname || ''
+  selectedNachname.value = person?.Nachname || ''
   tryLoadLohn()
 }
 

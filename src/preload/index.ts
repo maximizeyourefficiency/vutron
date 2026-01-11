@@ -10,7 +10,7 @@ const mainAvailChannels: string[] = [
   'msgOpenExternalLink',
   'msgOpenFile'
 ]
-const rendererAvailChannels: string[] = []
+const rendererAvailChannels: string[] = ['bericht-data']
 
 contextBridge.exposeInMainWorld('mainApi', {
   send: (channel: string, ...data: any[]): void => {
@@ -94,6 +94,7 @@ contextBridge.exposeInMainWorld('api', {
     }
   }
 })
+
 contextBridge.exposeInMainWorld('electron', {
   connect: async (query: string) => {
     console.log('preload query:', query)
@@ -131,13 +132,19 @@ contextBridge.exposeInMainWorld('electron', {
 
   get: async (query: string, params?: any[]) => {
     console.log('preload get:', query, params)
-    const res =  await ipcRenderer.invoke('db:get', query, params || [])
+    const res = await ipcRenderer.invoke('db:get', query, params || [])
     console.log('preload get res:', JSON.stringify(res))
     return res
+  },
+
+  generateBericht: async (params: {
+    personalId: number
+    jahr: number
+    monat: number
+    vorname: string
+    nachname: string
+  }) => {
+    console.log('preload generateBericht:', params)
+    return await ipcRenderer.invoke('pdf:generateBericht', params)
   }
-  /*
-  transaction: async (updates: Array<{ sql: string; params: any[] }>) => {
-    console.log('preload transaction:', updates)
-    return await ipcRenderer.invoke('db:transaction', updates)
-  }*/
 })

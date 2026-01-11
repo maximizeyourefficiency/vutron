@@ -2,12 +2,15 @@ import {
   app,
   BrowserWindow,
   RenderProcessGoneDetails,
-  BrowserWindowConstructorOptions
+  BrowserWindowConstructorOptions,
+  ipcMain
 } from 'electron'
 import Constants, { TrayOptions } from './utils/Constants'
 import IPCs from './IPCs'
 import { createTray, hideWindow, showWindow } from './tray'
 import log from 'electron-log/main'
+import { join } from 'path'
+import path from 'node:path'
 
 const options = {
   width: Constants.IS_DEV_ENV ? 1500 : 1200,

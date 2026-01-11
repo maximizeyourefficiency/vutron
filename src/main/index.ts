@@ -5,6 +5,12 @@ import log from 'electron-log/main'
 import { join } from 'path'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
+import {
+  BerichtRow,
+  BERICHT_SQL,
+  strukturiereDaten,
+  erstellePdfBericht
+} from './pdfBerichtErwin'
 
 let mainWindow
 let errorWindow
@@ -144,6 +150,66 @@ ipcMain.handle(
       db.exec('ROLLBACK')
       console.error('Transaction error:', error)
       throw error
+    }
+  }
+)
+
+// IPC-Handler für PDF-Bericht
+ipcMain.handle(
+  'pdf:generateBericht',
+  async (
+    _event,
+    params: {
+      personalId: number
+      jahr: number
+      monat: number
+      vorname: string
+      nachname: string
+    }
+  ) => {
+    log.info('PDF Bericht angefordert:', params)
+
+    if (!db) {
+      log.error('Database not initialized')
+      return { success: false, error: 'Database not initialized' }
+    }
+
+    try {
+      const { personalId, jahr, monat, vorname, nachname } = params
+
+      log.info('Führe SQL-Abfrage aus...')
+      // Daten abfragen (nur Personal_ID_F als Filter)
+      const stmt = db.prepare(BERICHT_SQL)
+      const rows = stmt.all(personalId) as BerichtRow[]
+      log.info(`SQL-Abfrage: ${rows.length} Zeilen gefunden`)
+
+      // Nach Jahr und Monat filtern (falls gewünscht)
+      const filteredRows = rows.filter(
+        (row) => row.Jahr === jahr && row.Monat === monat
+      )
+      log.info(`Nach Filter: ${filteredRows.length} Zeilen`)
+
+      if (filteredRows.length === 0) {
+        log.warn('Keine Daten für Bericht gefunden')
+        return { success: false, error: 'Keine Daten gefunden' }
+      }
+
+      log.info('Strukturiere Daten...')
+      // Daten strukturieren und PDF erstellen
+      const tageMap = strukturiereDaten(filteredRows)
+
+      log.info('Erstelle PDF...')
+      const result = await erstellePdfBericht(tageMap, {
+        vorname,
+        nachname,
+        monat,
+        jahr
+      })
+      log.info('PDF erstellt:', result)
+      return result
+    } catch (error) {
+      log.error('PDF Generierung fehlgeschlagen:', error)
+      return { success: false, error: String(error) }
     }
   }
 )

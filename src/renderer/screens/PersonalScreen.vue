@@ -1,8 +1,6 @@
 <template>
   <v-app>
     <v-container fluid>
-      <h1 class="mb-4"> Personalübersicht </h1>
-
       <!-- Statistik -->
       <v-row class="mb-4">
         <v-col

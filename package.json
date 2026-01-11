@@ -1,11 +1,11 @@
 {
-  "name": "my-vutron",
+  "name": "Steinhof GmbH",
   "appId": "com.vutron.vutron",
   "version": "1.0.0",
-  "description": "Quick Start Templates for Vite + Vue 3 + Electron",
-  "homepage": "https://vutron.cdget.com",
+  "description": "Steinhof GmbH Verwaltung",
+  "homepage": "https://www.steinhof-gmbh.de",
   "author": "Piet <p.tennler@gmail.com>",
-  "license": "MIT",
+  "license": "keine",
   "main": "dist/main/index.js",
   "private": true,
   "repository": {

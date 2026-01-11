@@ -1,13 +1,16 @@
 <script setup lang="tsx">
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiFitToScreenOutline, mdiHome, mdiCog } from '@mdi/js'
+import { mdiAccountGroup, mdiHome, mdiCog, mdiCounter } from '@mdi/js'
+import { useAuswertungStore } from '@/renderer/store/auswertung'
 
 const router = useRouter()
 const route: any = useRoute()
 const titleKey: string = (route?.meta?.titleKey || 'title.main') as string
 
 const { t } = useI18n()
+const auswertungStore = useAuswertungStore()
 
 const handleRoute = (path: string): void => {
   router.push(path)
@@ -17,10 +20,11 @@ const isCurrentRoute = (path: string): boolean => {
   return path === route.path
 }
 
-const headerMenus: {
+const allMenus: {
   icon: string
   text: string
   path: string
+  requiresUnlock?: boolean
 }[] = [
   {
     icon: mdiHome,
@@ -28,7 +32,7 @@ const headerMenus: {
     path: '/'
   },
   {
-    icon: mdiFitToScreenOutline,
+    icon: mdiAccountGroup,
     text: 'title.personal',
     path: '/personal'
   },
@@ -38,9 +42,10 @@ const headerMenus: {
     path: '/baustellen'
   },
   {
-    icon: mdiHome,
+    icon: mdiCounter,
     text: 'title.auswertung',
-    path: '/auswertung'
+    path: '/auswertung',
+    requiresUnlock: true
   },
   {
     icon: mdiCog,
@@ -48,6 +53,12 @@ const headerMenus: {
     path: '/einstellungen'
   }
 ]
+
+const headerMenus = computed(() => {
+  return allMenus.filter(
+    (menu) => !menu.requiresUnlock || auswertungStore.isUnlocked
+  )
+})
 </script>
 <template>
   <v-app-bar

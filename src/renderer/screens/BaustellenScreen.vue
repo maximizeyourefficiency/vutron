@@ -1,8 +1,6 @@
 <template>
   <v-app>
     <v-container fluid>
-      <h1 class="mb-4"> Baustellenübersicht </h1>
-
       <!-- Statistik -->
       <v-row class="mb-4">
         <v-col
@@ -57,15 +55,25 @@
       <v-data-table
         :headers="headers"
         :items="filteredBaustellen"
-        :loading="loading"
         :items-per-page="itemsPerPage"
+        :loading="loading"
         density="comfortable"
         class="elevation-1"
         :page="page"
         @update:page="page = $event"
         fixed-header
-        height="600px"
+        height="700px"
       >
+        <template #bottom>
+          <div class="d-flex justify-center align-center pa-2">
+            <v-pagination
+              v-model="page"
+              :length="Math.ceil(filteredBaustellen.length / itemsPerPage)"
+              :total-visible="7"
+              density="comfortable"
+            />
+          </div>
+        </template>
         <template #[`item.actions`]="{ item }">
           <v-btn
             icon
@@ -77,62 +85,50 @@
 
         <!-- Checkbox für OST -->
         <template #[`item.Ost`]="{ item }">
-          <v-chip
+          <v-icon
+            :icon="mdiCheckCircleOutline"
             v-if="item.Ost == -1"
             color="success"
             size="small"
-            variant="flat"
-          >
-            ✓
-          </v-chip>
-          <v-chip
+          />
+          <v-icon
+            :icon="mdiRadioboxBlank"
             v-else
             color="grey"
             size="small"
-            variant="outlined"
-          >
-            −
-          </v-chip>
+          />
         </template>
 
         <!-- Checkbox für Beendet -->
         <template #[`item.Beendet`]="{ item }">
-          <v-chip
+          <v-icon
+            :icon="mdiCheckCircleOutline"
             v-if="item.Beendet == -1"
             color="success"
             size="small"
-            variant="flat"
-          >
-            ✓
-          </v-chip>
-          <v-chip
+          />
+          <v-icon
+            :icon="mdiRadioboxBlank"
             v-else
             color="grey"
             size="small"
-            variant="outlined"
-          >
-            −
-          </v-chip>
+          />
         </template>
 
         <!-- Checkbox für Abgerechnet -->
         <template #[`item.Abgerechnet`]="{ item }">
-          <v-chip
+          <v-icon
+            :icon="mdiCheckCircleOutline"
             v-if="item.Abgerechnet == -1"
             color="success"
             size="small"
-            variant="flat"
-          >
-            ✓
-          </v-chip>
-          <v-chip
+          />
+          <v-icon
+            :icon="mdiRadioboxBlank"
             v-else
             color="grey"
             size="small"
-            variant="outlined"
-          >
-            −
-          </v-chip>
+          />
         </template>
 
         <template #no-data>
@@ -143,44 +139,6 @@
           >
             Keine Daten geladen.
           </v-alert>
-        </template>
-
-        <!-- Lazy Loading Button am Ende der Tabelle -->
-        <template #bottom>
-          <div class="d-flex justify-space-between align-center pa-4">
-            <div class="text-body-2">
-              {{ filteredBaustellen.length }} Einträge ({{
-                baustellen.length
-              }}
-              von {{ totalCount }} geladen)
-            </div>
-            <v-pagination
-              v-model="page"
-              :length="pageCount"
-              :total-visible="7"
-              size="small"
-            />
-
-            <v-btn
-              v-if="hasMoreData"
-              :loading="loading"
-              :disabled="loading"
-              color="primary"
-              variant="outlined"
-              size="small"
-              @click="loadMoreBaustellen"
-            >
-              <v-icon
-                start
-                :icon="mdiDownload"
-              />
-              Mehr laden ({{ remainingCount }})
-            </v-btn>
-            <div
-              v-else
-              style="width: 150px"
-            />
-          </div>
         </template>
       </v-data-table>
     </v-container>
@@ -568,7 +526,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { mdiPencil, mdiPlus, mdiMagnify, mdiDownload } from '@mdi/js'
+import {
+  mdiPencil,
+  mdiPlus,
+  mdiMagnify,
+  mdiCheckCircleOutline,
+  mdiRadioboxBlank
+} from '@mdi/js'
 import { openFile } from '@/renderer/utils'
 
 const search = ref('')
@@ -634,6 +598,7 @@ const headers = [
   { title: 'Bauende', key: 'Bauende' },
   { title: 'Beendet', key: 'Beendet' },
   { title: 'Stunden', key: 'Stunden' },
+  { title: 'Bauleiter', key: 'Name' },
   { title: 'Abgerechnet', key: 'Abgerechnet' },
   { title: 'Bemerkung', key: 'Bemerkung' },
   { title: 'Letzte Rechnung', key: 'letzteRechnung' }
@@ -650,16 +615,8 @@ const filteredBaustellen = computed(() => {
   })
 })
 
-const pageCount = computed(() => {
-  return Math.ceil(filteredBaustellen.value.length / itemsPerPage.value)
-})
-
 const hasMoreData = computed(() => {
   return currentOffset.value < totalCount.value
-})
-
-const remainingCount = computed(() => {
-  return Math.max(0, totalCount.value - currentOffset.value)
 })
 
 // Add Dialog Funktionen
@@ -767,6 +724,11 @@ async function saveNewItem() {
 function openEditDialog(item) {
   editedIndex.value = baustellen.value.indexOf(item)
   editedItem.value = { ...item }
+  // Finde das passende AG-Objekt für die Combobox
+  const agObject = agList.value.find((ag) => ag.AG_ID === item.AG_ID_F)
+  if (agObject) {
+    editedItem.value.AG_ID_F = agObject
+  }
   editDialog.value = true
 }
 
@@ -879,6 +841,7 @@ async function loadBaustellen() {
         tblbaustellen.Baustellen_ID,
         tblbaustellen.Baustellennummer,
         tblbaustellen.Jahr,
+        tblbaustellen.AG_ID_F,
         tblAG.AG_Name,
         tblbaustellen.PLZ,
         tblbaustellen.Ort,
@@ -890,9 +853,11 @@ async function loadBaustellen() {
         tblbaustellen.Stunden,
         tblbaustellen.Abgerechnet,
         tblbaustellen.Bemerkung,
-        tblbaustellen.letzteRechnung
+        tblbaustellen.letzteRechnung,
+        tblbauleiter.name
       FROM tblbaustellen
-      INNER JOIN tblAG ON tblbaustellen.AG_ID_F = tblAG.AG_ID
+      INNER JOIN tblag ON tblbaustellen.AG_ID_F = tblAG.AG_ID
+      INNER JOIN tblbauleiter ON tblbaustellen.Bauleiter_ID_F = tblbauleiter.Bauleiter_ID
       WHERE tblbaustellen.Baustellen_ID NOT BETWEEN 3734 AND 3738 
         AND tblbaustellen.Baustellen_ID <> 4361
       ORDER BY tblbaustellen.Baustellennummer DESC 
@@ -927,10 +892,11 @@ async function loadMoreBaustellen() {
 
   try {
     const result = await window.electron.getAll(
-      `SELECT 
+      `SELECT
         tblbaustellen.Baustellen_ID,
         tblbaustellen.Baustellennummer,
         tblbaustellen.Jahr,
+        tblbaustellen.AG_ID_F,
         tblAG.AG_Name,
         tblbaustellen.PLZ,
         tblbaustellen.Ort,
@@ -945,9 +911,9 @@ async function loadMoreBaustellen() {
         tblbaustellen.letzteRechnung
       FROM tblbaustellen
       INNER JOIN tblAG ON tblbaustellen.AG_ID_F = tblAG.AG_ID
-      WHERE tblbaustellen.Baustellen_ID NOT BETWEEN 3734 AND 3738 
+      WHERE tblbaustellen.Baustellen_ID NOT BETWEEN 3734 AND 3738
         AND tblbaustellen.Baustellen_ID <> 4361
-      ORDER BY tblbaustellen.Baustellennummer DESC 
+      ORDER BY tblbaustellen.Baustellennummer DESC
       LIMIT ${pageSize} OFFSET ${currentOffset.value}`
     )
 

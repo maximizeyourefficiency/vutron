@@ -135,12 +135,22 @@ ipcMain.handle(
 
       // Alle Queries ausführen
       for (const query of queries) {
-        const stmt = db.prepare(query.sql)
-        const result = stmt.run(...query.params)
-        results.push({
-          changes: result.changes,
-          lastInsertRowid: result.lastInsertRowid
-        })
+        console.log('Transaction query:', query.sql)
+        console.log('Transaction params:', JSON.stringify(query.params))
+        // Baue SQL mit eingesetzten Werten (für node:sqlite)
+        let sql = query.sql
+        for (const param of query.params) {
+          if (typeof param === 'string') {
+            sql = sql.replace('?', `'${param.replace(/'/g, "''")}'`)
+          } else if (param === null) {
+            sql = sql.replace('?', 'NULL')
+          } else {
+            sql = sql.replace('?', String(param))
+          }
+        }
+        console.log('Transaction final SQL:', sql)
+        db.exec(sql)
+        results.push({ success: true })
       }
 
       // Transaction bestätigen

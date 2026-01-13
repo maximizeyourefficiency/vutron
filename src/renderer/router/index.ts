@@ -33,6 +33,20 @@ export default createRouter({
       }
     },
     {
+      path: '/erfassung',
+      component: () => import('@/renderer/screens/ErfassungScreen.vue'),
+      meta: {
+        titleKey: 'title.erfassung'
+      }
+    },
+    {
+      path: '/erfassung/ergaenzung',
+      component: () => import('@/renderer/screens/ErgaenzungScreen.vue'),
+      meta: {
+        titleKey: 'title.ergaenzung'
+      }
+    },
+    {
       path: '/auswertung',
       component: () => import('@/renderer/screens/AuswertungScreen.vue'),
       meta: {

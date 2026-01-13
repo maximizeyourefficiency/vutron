@@ -120,9 +120,9 @@ contextBridge.exposeInMainWorld('electron', {
       throw error
     }
   },
-  transaction: async (query: string, params?: any[]) => {
-    console.log('preload query:', query, params)
-    return await ipcRenderer.invoke('db:transaction', query, params || [])
+  transaction: async (queries: Array<{ sql: string; params: any[] }>) => {
+    console.log('preload transaction:', queries)
+    return await ipcRenderer.invoke('db:transaction', queries)
   },
 
   execute: async (query: string, params?: any[]) => {

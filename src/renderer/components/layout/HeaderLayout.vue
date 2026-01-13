@@ -23,8 +23,9 @@ const isCurrentRoute = (path: string): boolean => {
 const allMenus: {
   icon: string
   text: string
-  path: string
+  path?: string
   requiresUnlock?: boolean
+  children?: { text: string; path: string }[]
 }[] = [
   {
     icon: mdiHome,
@@ -40,6 +41,14 @@ const allMenus: {
     icon: mdiHome,
     text: 'title.baustellen',
     path: '/baustellen'
+  },
+  {
+    icon: mdiCounter,
+    text: 'title.erfassung',
+    children: [
+      { text: 'Tageserfassung', path: '/erfassung' },
+      { text: 'Ergänzung', path: '/erfassung/ergaenzung' }
+    ]
   },
   {
     icon: mdiCounter,
@@ -67,16 +76,50 @@ const headerMenus = computed(() => {
   >
     <v-app-bar-title>{{ t(titleKey) }}</v-app-bar-title>
     <template #append>
-      <v-btn
+      <template
         v-for="menu in headerMenus"
-        :key="menu.path"
-        :prepend-icon="menu.icon"
-        variant="text"
-        :class="{ active: isCurrentRoute(menu.path) }"
-        @click="handleRoute(menu.path)"
+        :key="menu.path || menu.text"
       >
-        {{ t(menu.text) }}
-      </v-btn>
+        <!-- Menü mit Untermenü -->
+        <v-menu
+          v-if="menu.children"
+          offset-y
+        >
+          <template #activator="{ props }">
+            <v-btn
+              v-bind="props"
+              :prepend-icon="menu.icon"
+              variant="text"
+              :class="{
+                active: menu.children.some((c) => isCurrentRoute(c.path))
+              }"
+            >
+              {{ t(menu.text) }}
+            </v-btn>
+          </template>
+          <v-list density="compact">
+            <v-list-item
+              v-for="child in menu.children"
+              :key="child.path"
+              :class="{ 'v-list-item--active': isCurrentRoute(child.path) }"
+              @click="handleRoute(child.path)"
+            >
+              <v-list-item-title>{{ child.text }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
+        <!-- Normaler Menüpunkt -->
+        <v-btn
+          v-else
+          :prepend-icon="menu.icon"
+          variant="text"
+          :class="{ active: isCurrentRoute(menu.path) }"
+          @click="handleRoute(menu.path)"
+        >
+          {{ t(menu.text) }}
+        </v-btn>
+      </template>
     </template>
   </v-app-bar>
 </template>
